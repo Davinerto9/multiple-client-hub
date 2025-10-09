@@ -1,0 +1,14 @@
+[
+  {
+    "marcaDeTiempo": 1759939237789,
+    "nombreRemitente": "derson",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "Holi"
+  },
+  {
+    "marcaDeTiempo": 1759939308328,
+    "nombreRemitente": "pe",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "Hola que tal"
+  }
+]

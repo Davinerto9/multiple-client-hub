@@ -1,0 +1,20 @@
+[
+  {
+    "marcaDeTiempo": 1760014103982,
+    "nombreRemitente": "peso",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "jjjjj"
+  },
+  {
+    "marcaDeTiempo": 1760014118146,
+    "nombreRemitente": "bert J",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "djsdksjdkajdkasjd"
+  },
+  {
+    "marcaDeTiempo": 1760014220078,
+    "nombreRemitente": "bert J",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "hola pepe"
+  }
+]

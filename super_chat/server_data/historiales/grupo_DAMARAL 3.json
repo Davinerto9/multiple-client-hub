@@ -1,0 +1,14 @@
+[
+  {
+    "marcaDeTiempo": 1760013071959,
+    "nombreRemitente": "CONECTARSE_AL_SERVIDOR:anderSON",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "anderson vs DamaMID"
+  },
+  {
+    "marcaDeTiempo": 1760013130053,
+    "nombreRemitente": "CONECTARSE_AL_SERVIDOR:pepes",
+    "tipoDeMensaje": "TEXTO",
+    "contenido": "garrus vs JHON"
+  }
+]
