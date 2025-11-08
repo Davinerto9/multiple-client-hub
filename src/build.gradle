@@ -28,7 +28,7 @@ test {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -88,3 +88,15 @@ task buildJars(dependsOn: [jar, clientJar]) {
     group = 'build'
     description = 'Builds both server and client executable JARs.'
 }
+
+//hola esto es algo
+// 1) Forzar UTF-8 (evita los � en mensajes con tildes)
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += ['-Dfile.encoding=UTF-8']
+}
+
+// 2) Permitir entrada por consola en el cliente
+tasks.named('runClient', JavaExec) {
+    standardInput = System.in
+}
+

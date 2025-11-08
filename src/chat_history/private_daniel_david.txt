@@ -4,3 +4,11 @@
 [2025-10-10 00:12:12] DANIEL -> DAVID: hola
 [2025-10-10 00:13:18] DANIEL -> DAVID: gogo
 [2025-10-10 00:13:18] DANIEL -> DAVID: gogo
+[2025-11-08 09:50:16] david -> daniel: hola
+[2025-11-08 09:50:16] david -> daniel: hola
+[2025-11-08 09:50:40] david -> daniel: como vas daniel te odio con todo mi corazon
+[2025-11-08 09:50:40] david -> daniel: como vas daniel te odio con todo mi corazon
+[2025-11-08 14:20:07] daniel -> david: hola
+[2025-11-08 14:20:07] daniel -> david: hola
+[2025-11-08 15:42:15] david -> daniel: esta mierda me dejo de funcioanr
+[2025-11-08 15:42:15] david -> daniel: esta mierda me dejo de funcioanr

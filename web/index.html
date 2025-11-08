@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ChatApp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- LOGIN -->
+  <section id="loginView" class="center">
+    <div class="card login-card">
+      <h1>ChatApp</h1>
+      <p class="muted">Elige tu nombre para entrar</p>
+      <div class="row">
+        <input id="loginName" type="text" placeholder="Tu nombre (ej. daniel)" />
+        <button id="loginBtn">Entrar</button>
+      </div>
+      <p class="tiny muted">Tip: abre una consola cliente con ese mismo nombre para mensajear en tiempo real.</p>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="appView" class="app hidden">
+    <aside class="sidebar">
+      <div class="user-banner">
+        <div>
+          <div class="muted tiny">Logged in as:</div>
+          <div id="me" class="me"></div>
+        </div>
+        <button id="logoutBtn" class="ghost">Logout</button>
+      </div>
+
+      <button id="newGroupBtn" class="primary full">➕ Create Group</button>
+
+      <h3>USERS</h3>
+      <div class="adder">
+        <input id="addUserInput" type="text" placeholder="Agregar usuario…" />
+        <button id="addUserBtn" class="ghost">+ Add</button>
+      </div>
+      <ul id="userList" class="list"></ul>
+
+      <h3>GROUPS</h3>
+      <div class="adder">
+        <input id="addGroupInput" type="text" placeholder="Agregar grupo…" />
+        <button id="addGroupBtn" class="ghost">+ Add</button>
+      </div>
+      <ul id="groupList" class="list"></ul>
+    </aside>
+
+    <main class="chat">
+      <header class="chat-header">
+        <div>
+          <div class="muted tiny" id="chatType">Group Chat</div>
+          <h2 id="chatTitle">—</h2>
+        </div>
+        <button id="historyBtn" class="ghost">📜 Ver historial</button>
+      </header>
+
+      <div id="messages" class="messages"></div>
+
+      <footer class="composer">
+        <input id="messageInput" type="text" placeholder="Escribe un mensaje…" />
+        <button id="sendBtn" class="primary">Send</button>
+      </footer>
+
+      <pre id="debugOut" class="debug hidden"></pre>
+    </main>
+  </section>
+
+  <script defer src="app.js"></script>
+</body>
+</html>

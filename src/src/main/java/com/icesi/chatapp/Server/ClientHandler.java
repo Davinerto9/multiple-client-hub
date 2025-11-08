@@ -1,10 +1,37 @@
 package com.icesi.chatapp.Server;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
 public class ClientHandler implements Runnable {
+
+    static class ApiCommand {
+    String op;
+    String creator;
+    String groupName;
+    String from;
+    String to;
+    String group;
+    String message;
+    String u1;
+    String u2;
+}
+private boolean apiSession = false;
+private static final Gson gson = new Gson();
+private void sendEvent(String type, Map<String,Object> data) {
+    if (!apiSession) return;
+    Map<String,Object> evt = new HashMap<>();
+    evt.put("type", type);
+    evt.put("data", data);
+    writeJson(evt);
+}
+
+private void writeJson(Object obj) {
+    out.println(gson.toJson(obj));
+    out.flush();
+}
     private Socket clientSocket;
     private String clientName;
     private BufferedReader in;
@@ -33,6 +60,61 @@ public class ClientHandler implements Runnable {
 @Override
 public void run() {
     try {
+        try {
+            // === Detección de modo API ===
+            clientSocket.setSoTimeout(200);
+            String first = in.readLine();
+            clientSocket.setSoTimeout(0);
+
+            if (first != null) {
+                // ❶ Sesión persistente para frontend (WebSocket via proxy)
+                if (first.startsWith("API_SESSION ")) {
+                    Map<String, String> open = gson.fromJson(
+                            first.substring(12),
+                            new com.google.gson.reflect.TypeToken<Map<String,String>>(){}.getType()
+                    );
+                    String name = open.get("name");
+                    if (name == null || name.trim().isEmpty()) {
+                        writeJson(Map.of("ok", false, "error", "name requerido"));
+                        clientSocket.close();
+                        return;
+                    }
+
+                    this.clientName = name.trim();
+                    synchronized (users) {
+                        if (users.containsKey(clientName)) {
+                            writeJson(Map.of("ok", false, "error", "Nombre ya en uso"));
+                            clientSocket.close();
+                            return;
+                        }
+                        users.put(clientName, this);
+                    }
+
+                    // marca que este handler es una sesión API persistente
+                    this.apiSession = true;
+                    writeJson(Map.of("ok", true, "type", "hello", "name", clientName));
+
+                    // Bucle de comandos JSON línea a línea hasta que el cliente cierre
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        handleApi(line); // ahora recibe JSON puro por línea
+                    }
+                    return; // al salir del bucle, cerrará en finally
+                }
+
+                // ❷ Modo API “one-shot” (tu modo anterior)
+                if (first.startsWith("API ")) {
+                    handleApi(first.substring(4)); // quita "API "
+                    clientSocket.close();
+                    return;
+                }
+            }
+        } catch (java.net.SocketTimeoutException ignore) {
+            // No llegó nada aún → continuamos a modo interactivo
+            clientSocket.setSoTimeout(0);
+        }
+
+        // === ❸ Modo interactivo por consola (sin cambios en lógica) ===
         out.println("Ingresa tu nombre:");
         clientName = in.readLine();
 
@@ -47,83 +129,160 @@ public void run() {
 
         out.println("¡Hola " + clientName + "!");
 
-        // Menú principal
         String opcion;
         while (true) {
             out.println("\nMENU:\n" +
-                "1. Enviar mensaje a usuario\n" +
-                "2. Crear grupo\n" +
-                "3. Enviar mensaje a grupo\n" +
-                "4. Salir\n" +
-                "5. Nota de voz privada\n" +
-                "6. Nota de voz a grupo\n" +
-                "7. Ver historial privado\n" +
-                "8. Ver historial de grupo\n" +
-                "9. Llamar a un usuario\n" +
-                "Elige opcion:");
+                    "1. Enviar mensaje a usuario\n" +
+                    "2. Crear grupo\n" +
+                    "3. Enviar mensaje a grupo\n" +
+                    "4. Salir\n" +
+                    "5. Nota de voz privada\n" +
+                    "6. Nota de voz a grupo\n" +
+                    "7. Ver historial privado\n" +
+                    "8. Ver historial de grupo\n" +
+                    "9. Llamar a un usuario\n" +
+                    "Elige opcion:");
 
             opcion = in.readLine();
-
             if (opcion == null || opcion.equals("4")) break;
 
             switch (opcion) {
-                case "1":
-                    enviarPrivado();
-                    break;
-                case "2":
-                    crearGrupo();
-                    break;
-                case "3":
-                    enviarAGrupo();
-                    break;
-                case "5":
-                    manejarNotaVozPrivada();
-                    break;
-                case "6":
-                    manejarNotaVozGrupo();
-                    break;
-                case "7":
-                    verHistorialPrivado();
-                    break;
-                case "8":
-                    verHistorialGrupo();
-                    break;
-                case "9":
-                    manejarLlamada();
-                    break;
-
-                // 👇 Casos especiales de llamadas
-                case "CALL_ACCEPTED":
-                    System.out.println("Llamada aceptada por: " + clientName);
-                    break;
-                case "CALL_REJECTED":
-                    System.out.println("Llamada rechazada por: " + clientName);
-                    break;
-
-                default:
-                    out.println("Opción no válida.");
-                    break;
+                case "1": enviarPrivado(); break;
+                case "2": crearGrupo(); break;
+                case "3": enviarAGrupo(); break;
+                case "5": manejarNotaVozPrivada(); break;
+                case "6": manejarNotaVozGrupo(); break;
+                case "7": verHistorialPrivado(); break;
+                case "8": verHistorialGrupo(); break;
+                case "9": manejarLlamada(); break;
+                case "CALL_ACCEPTED": System.out.println("Llamada aceptada por: " + clientName); break;
+                case "CALL_REJECTED": System.out.println("Llamada rechazada por: " + clientName); break;
+                default: out.println("Opción no válida."); break;
             }
         }
-
     } catch (IOException e) {
         System.out.println("Error con el cliente " + clientName + ": " + e.getMessage());
     } finally {
         try {
-            // si se desconecta el cliente, eliminar usuario y eliminarlo de grupos
-            synchronized (users) {
-                users.remove(clientName);
-            }
+            synchronized (users) { users.remove(clientName); }
             synchronized (groups) {
-                for (Set<ClientHandler> grupo : groups.values()) {
-                    grupo.remove(this);
-                }
+                for (Set<ClientHandler> grupo : groups.values()) { grupo.remove(this); }
             }
             clientSocket.close();
             System.out.println("Cliente " + clientName + " desconectado.");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+}
+
+private void handleApi(String json) {
+    try {
+        ApiCommand cmd = gson.fromJson(json, ApiCommand.class);
+        Map<String,Object> resp = new HashMap<>();
+        resp.put("ok", true);
+
+        switch (cmd.op) {
+            case "create_group": {
+                if (cmd.groupName == null || cmd.creator == null) {
+                    resp.put("ok", false); resp.put("error", "Faltan campos");
+                    writeJson(resp); return;
+                }
+                synchronized (groups) {
+                    groups.putIfAbsent(cmd.groupName, Collections.synchronizedSet(new HashSet<>()));
+                    // opcional: si el creador está conectado, lo agregamos
+                    ClientHandler creador;
+                    synchronized (users) { creador = users.get(cmd.creator); }
+                    if (creador != null) { groups.get(cmd.groupName).add(creador); }
+                }
+                resp.put("msg", "Grupo creado: " + cmd.groupName);
+                writeJson(resp);
+                break;
+            }
+            case "send_user": {
+                if (cmd.from == null || cmd.to == null || cmd.message == null) {
+                    resp.put("ok", false); resp.put("error", "Faltan campos");
+                    writeJson(resp); return;
+                }
+                ClientHandler receptor;
+                synchronized (users) { receptor = users.get(cmd.to); }
+                if (receptor != null && !cmd.to.equals(cmd.from)) {
+                    // consola (cliente interactivo)
+                    receptor.out.println("Mensaje privado de " + cmd.from + ": " + cmd.message);
+                    // frontend (sesión API)
+                    receptor.sendEvent("message", Map.of(
+                    "kind", "private",
+                    "from", cmd.from,
+                    "to", cmd.to,
+                    "text", cmd.message,
+                    "ts", new java.util.Date().toString()
+                    ));
+                }
+
+                MessageHistory.savePrivateMessage(cmd.from, cmd.to, cmd.message);
+                Database.saveTextMessage("private", cmd.from, cmd.to, false, cmd.message);
+                resp.put("msg", "Mensaje privado enviado/registrado");
+                writeJson(resp);
+                break;
+            }
+            case "send_group": {
+                if (cmd.from == null || cmd.group == null || cmd.message == null) {
+                    resp.put("ok", false); resp.put("error", "Faltan campos");
+                    writeJson(resp); return;
+                }
+                synchronized (groups) {
+                   Set<ClientHandler> miembros = groups.get(cmd.group);
+                if (miembros != null) {
+                    for (ClientHandler m : miembros) {
+                        if (!m.clientName.equals(cmd.from)) {
+                             // consola
+                             m.out.println("[" + cmd.group + "] " + cmd.from + ": " + cmd.message);
+                            // frontend
+                             m.sendEvent("message", Map.of(
+                                "kind", "group",
+                                "group", cmd.group,
+                                 "from",  cmd.from,
+                                "text",  cmd.message,
+                               "ts",    new java.util.Date().toString()
+                               ));
+                            }
+                        }
+                    }
+                }
+                MessageHistory.saveGroupMessage(cmd.from, cmd.group, cmd.message);
+                Database.saveTextMessage("group", cmd.from, cmd.group, true, cmd.message);
+                resp.put("msg", "Mensaje grupal enviado/registrado");
+                writeJson(resp);
+                break;
+            }
+            case "history_user": {
+                if (cmd.u1 == null || cmd.u2 == null) {
+                    resp.put("ok", false); resp.put("error", "Faltan campos");
+                    writeJson(resp); return;
+                }
+                List<String> h = MessageHistory.getPrivateHistory(cmd.u1, cmd.u2);
+                writeJson(h);
+                break;
+            }
+            case "history_group": {
+                if (cmd.group == null) {
+                    resp.put("ok", false); resp.put("error", "Faltan campos");
+                    writeJson(resp); return;
+                }
+                List<String> h = MessageHistory.getGroupHistory(cmd.group);
+                writeJson(h);
+                break;
+            }
+            default:
+                resp.put("ok", false);
+                resp.put("error", "Operación no soportada: " + cmd.op);
+                writeJson(resp);
+        }
+    } catch (Exception e) {
+        Map<String,Object> err = new HashMap<>();
+        err.put("ok", false);
+        err.put("error", e.getMessage());
+        writeJson(err);
     }
 }
 

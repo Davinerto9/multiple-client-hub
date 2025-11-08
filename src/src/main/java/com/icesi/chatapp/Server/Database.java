@@ -21,7 +21,7 @@ public class Database {
     public static synchronized void init() throws SQLException {
         if (ds != null)
             return;
-        String dbHost = "192.168.1.10"; // o "localhost" si es la misma máquina
+        String dbHost = "localhost"; // o "localhost" si es la misma máquina
         int dbPort = 5432;
         String dbName = "chatdb";
         String dbUser = "chat";
