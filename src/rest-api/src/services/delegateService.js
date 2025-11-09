@@ -42,7 +42,7 @@ class DelegateService {
                 // Incluimos el usuario actual en cada petición
                 const request = JSON.stringify({
                     action,
-                    currentUser: this.currentUser || 'unknown',  // ← Aquí se agrega
+                    currentUser: this.currentUser || 'unknown',
                     data
                 }) + '\n';
 
@@ -120,7 +120,6 @@ class DelegateService {
         });
     }
 
-    // Método para registrar usuario
     async registerUser(username, sessionId) {
         return this.sendRequest('0', {
             username: username,
@@ -134,7 +133,6 @@ class DelegateService {
         });
     }
 
-    // NUEVOS MÉTODOS
     async getConnectedUsers() {
         return this.sendRequest('9', {});
     }

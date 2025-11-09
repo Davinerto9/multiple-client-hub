@@ -9,7 +9,7 @@ export default function ChatApp(username) {
     let chatType = null;
     let currentUser = username;
     let messages = [];
-    let users = []; // Simulated users
+    let users = []; 
     let groups = [];
     let currentView = 'chat';
     let historyData = [];
@@ -570,7 +570,6 @@ export default function ChatApp(username) {
         try {
             let history;
             if (chatType === 'private') {
-                // ⚠️ Usa currentUser o username correcto
                 history = await ChatService.getPrivateHistory(currentUser || username, selectedChat);
             } else {
                 const groupName = typeof selectedChat === 'object' ? selectedChat.name : selectedChat;

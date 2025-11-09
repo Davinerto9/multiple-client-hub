@@ -1,5 +1,5 @@
 import ChatApp from './ChatApp.js';
-import { ChatService } from '../services/chatService.js'; // <-- ajusta la ruta si difiere
+import { ChatService } from '../services/chatService.js';
 
 export function Home() {
   const container = document.createElement('div');
@@ -50,12 +50,11 @@ export function Home() {
       message.textContent = '';
       const sid = getSessionId();
 
-      // 👉 registrar en el backend ANTES de montar el chat
       const r = await ChatService.registerUser(username, sid);
       if (r.status === 'error') {
         message.textContent = r.message || 'Username already in use';
         message.style.color = '#e11d48';
-        return; // no montes el chat si el nombre está tomado
+        return;
       }
 
       // ok, monta el chat

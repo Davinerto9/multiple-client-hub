@@ -39,7 +39,7 @@ app.get('/users', async (req, res) => {
         }
     } catch (err) {
         console.error('Error getting users:', err);
-        res.status(200).json([]); // Retornar array vacío en caso de error
+        res.status(200).json([]);
     }
 });
 
@@ -196,7 +196,7 @@ app.delete('/groups/:name', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Group name is required' });
     }
 
-    const response = await delegate.deleteGroup(groupName); // acción "4"
+    const response = await delegate.deleteGroup(groupName);
     if (response.status === 'ok') {
       return res.status(200).json(response);
     } else {
