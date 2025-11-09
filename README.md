@@ -1,25 +1,44 @@
-# ChatApp - Documentación y Guía de Uso
+# Multiple Client Hub - Sistema de Chat con Cliente Web
 
 ## Descripción General
-Este proyecto es una aplicación de chat en Java que permite la comunicación entre clientes y un servidor, incluyendo mensajería de texto y llamadas de audio. Está estructurado en dos módulos principales: **Cliente** y **Servidor**. Utiliza sockets para la comunicación y soporta tanto chats grupales como privados, además de la transferencia y reproducción de audios.
+Este proyecto es una aplicación de chat que soporta tanto clientes Java como web, permitiendo la comunicación entre usuarios a través de mensajería de texto y llamadas de audio. El sistema está estructurado en tres módulos principales:
+- **Cliente Java**: Implementación original con soporte completo de funcionalidades
+- **Cliente Web**: Nueva implementación HTTP para funciones básicas de chat
+- **Servidor**: Backend en Java que maneja la lógica central del sistema
+
+El sistema utiliza una combinación de protocolos TCP/IP para el cliente Java y HTTP para el cliente web, con un proxy que traduce las peticiones entre ambos.
 
 ---
 
 ## Estructura del Proyecto
 
 ```
-src/main/java/com/icesi/chatapp/
-  ├── Client/
-  │   ├── AudioCallReceiver.java
-  │   ├── AudioCallSender.java
-  │   ├── AudioPlayer.java
-  │   ├── AudioSender.java
-  │   ├── Client.java
-  │   └── ClientAudioReceiver.java
-  └── Server/
-      ├── ClientHandler.java
-      ├── MessageHistory.java
-      └── Server.java
+src/
+├── main/java/com/icesi/chatapp/          # Backend Java
+│   ├── Client/                           # Cliente Java original
+│   │   ├── AudioCallReceiver.java
+│   │   ├── AudioCallSender.java
+│   │   ├── AudioPlayer.java
+│   │   ├── AudioSender.java
+│   │   ├── Client.java
+│   │   └── ClientAudioReceiver.java
+│   └── Server/                           # Servidor Java
+│       ├── ClientHandler.java
+│       ├── MessageHistory.java
+│       └── Server.java
+├── rest-api/                             # Servidor proxy HTTP
+│   ├── src/
+│   │   ├── index.js                      # Punto de entrada del proxy
+│   │   └── services/
+│   │       └── delegateService.js        # Servicios de traducción HTTP-TCP
+│   └── package.json
+└── web-client/                           # Cliente web React
+    ├── src/
+    │   ├── pages/
+    │   │   └── ChatApp.js               # Componente principal del chat
+    │   └── components/                   # Componentes reutilizables
+    ├── index.html
+    └── package.json
 ```
 
 ### Carpetas y Archivos Clave
@@ -51,10 +70,14 @@ src/main/java/com/icesi/chatapp/
 ## Instrucciones de Uso
 
 ### 1. Requisitos Previos
-- Java 25 o superior(Cambiar la versión de la Máquina en build.gradle)
+- Java 25 o superior (Cambiar la versión de la Máquina en build.gradle)
 - Gradle (o usar los scripts `gradle`/`gradlew.bat` incluidos)
+- Node.js 14 o superior
+- npm o yarn
 
-### 2. Compilación del Proyecto
+### 2. Instalación y Configuración
+
+#### Backend Java
 Desde la raíz del proyecto, ejecuta:
 
 **En Windows:**
@@ -66,32 +89,60 @@ gradlew.bat build
 ./gradle build
 ```
 
-Los archivos `.class` se generarán en `build/classes/java/main/`.
-
-### 3. Ejecución del Servidor
-Ubícate en la raíz del proyecto y ejecuta:
+#### Servidor Proxy HTTP
+```bash
+cd src/rest-api
+npm install
 ```
+
+#### Cliente Web
+```bash
+cd src/web-client
+npm install
+```
+
+### 3. Ejecución del Sistema
+
+#### a) Iniciar el Servidor Java
+```bash
 java -cp build/classes/java/main com.icesi.chatapp.Server.Server
 ```
 
-### 4. Ejecución del Cliente
-En otra terminal, ejecuta:
+#### b) Iniciar el Servidor Proxy
+```bash
+cd src/rest-api
+npm start
 ```
+
+#### c) Iniciar el Cliente Web
+```bash
+cd src/web-client
+npm start
+```
+
+#### d) (Opcional) Iniciar Cliente Java
+```bash
 java -cp build/classes/java/main com.icesi.chatapp.Client.Client
 ```
 
-Puedes ejecutar varios clientes para simular múltiples usuarios.
+### 4. Funcionalidades
 
-### 5. Funcionalidades Principales
-- **Mensajería grupal y privada**: Los usuarios pueden enviar mensajes a grupos o a otros usuarios.
-- **Historial de chat**: Los mensajes se almacenan en archivos dentro de `chat_history/`.
-- **Envío y reproducción de audios**: Los usuarios pueden grabar, enviar y reproducir audios.
-- **Llamadas de audio**: Permite llamadas de audio en tiempo real entre clientes.
+#### Cliente Web (HTTP)
+- **Mensajería privada**: Envío de mensajes entre usuarios
+- **Grupos de chat**: Creación y mensajería grupal
+- **Historial**: Visualización de mensajes anteriores
+- **Interfaz intuitiva**: Diseño moderno y responsive
 
-### 6. Archivos Generados
-- **chat_history/**: Historial de mensajes.
-- **audios_recibidos/**: Audios recibidos por el cliente.
-- **server_audios/**: Audios almacenados en el servidor.
+#### Cliente Java (Original)
+- **Todas las funciones del cliente web**
+- **Llamadas de audio**: Comunicación por voz en tiempo real
+- **Notas de voz**: Envío y reproducción de mensajes de audio
+- **Gestión avanzada de grupos**: Más opciones de administración
+
+### 5. Archivos Generados
+- **chat_history/**: Historial de mensajes
+- **server_audios/**: Audios almacenados (cliente Java)
+- **audios_recibidos/**: Audios recibidos (cliente Java)
 
 ---
 

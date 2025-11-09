@@ -162,7 +162,7 @@ public void run() {
             
             // Guardar en historial
             MessageHistory.savePrivateMessage(clientName, destino, mensaje);
-            Database.saveTextMessage("private", clientName, destino, false, mensaje);
+            //Database.saveTextMessage("private", clientName, destino, false, mensaje);
             
             out.println("Mensaje enviado correctamente.");
         } else {
@@ -260,7 +260,7 @@ public void run() {
         
         // Guardar en historial
         MessageHistory.saveGroupMessage(clientName, grupo, mensaje);
-        Database.saveTextMessage("group", clientName, grupo, true, mensaje);
+        //Database.saveTextMessage("group", clientName, grupo, true, mensaje);
         
         out.println("Mensaje enviado al grupo correctamente.");
     }
@@ -319,7 +319,7 @@ public void run() {
             if (enviado) {
                 // Guardar en historial
                 MessageHistory.savePrivateAudio(this.clientName, destino, audioRecibido);
-                Database.saveAudioRecord(this.clientName, destino, false, audioRecibido.getAbsolutePath());
+                //Database.saveAudioRecord(this.clientName, destino, false, audioRecibido.getAbsolutePath());
                 out.println("Nota de voz enviada correctamente a " + destino);
                 System.out.println("Audio privado enviado de " + clientName + " a " + destino);
             } else {
@@ -386,7 +386,7 @@ public void run() {
             if (exitosos > 0) {
                 // Guardar en historial
                 MessageHistory.saveGroupAudio(this.clientName, nombreGrupo, audioRecibido);
-                Database.saveAudioRecord(this.clientName, nombreGrupo, true, audioRecibido.getAbsolutePath());
+                //Database.saveAudioRecord(this.clientName, nombreGrupo, true, audioRecibido.getAbsolutePath());
                 out.println("Nota de voz enviada correctamente al grupo " + nombreGrupo + " (" + exitosos + " miembros)");
                 System.out.println("Audio grupal enviado de " + clientName + " al grupo " + nombreGrupo + " (" + exitosos + " receptores)");
             } else {
@@ -636,7 +636,5 @@ public void run() {
             e.printStackTrace();
         }
     }
-
-
 
 }

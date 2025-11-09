@@ -17,7 +17,7 @@ public class MessageHistory {
     }
     
     // Guardar mensaje de texto privado
-    public static void savePrivateMessage(String sender, String receiver, String message) {
+    public static synchronized void savePrivateMessage(String sender, String receiver, String message) {
         String timestamp = LocalDateTime.now().format(formatter);
         String logEntry = String.format("[%s] %s -> %s: %s%n", timestamp, sender, receiver, message);
         
@@ -28,7 +28,7 @@ public class MessageHistory {
     }
     
     // Guardar mensaje de texto grupal
-    public static void saveGroupMessage(String sender, String groupName, String message) {
+    public static synchronized void saveGroupMessage(String sender, String groupName, String message) {
         String timestamp = LocalDateTime.now().format(formatter);
         String logEntry = String.format("[%s] %s en %s: %s%n", timestamp, sender, groupName, message);
         
@@ -36,7 +36,7 @@ public class MessageHistory {
     }
     
     // Guardar nota de voz privada
-    public static void savePrivateAudio(String sender, String receiver, File audioFile) {
+    public static synchronized void savePrivateAudio(String sender, String receiver, File audioFile) {
         String timestamp = LocalDateTime.now().format(formatter);
         
         // Copiar archivo de audio al historial
@@ -51,7 +51,7 @@ public class MessageHistory {
     }
     
     // Guardar nota de voz grupal
-    public static void saveGroupAudio(String sender, String groupName, File audioFile) {
+    public static synchronized void  saveGroupAudio(String sender, String groupName, File audioFile) {
         String timestamp = LocalDateTime.now().format(formatter);
         
         // Copiar archivo de audio al historial
@@ -65,19 +65,19 @@ public class MessageHistory {
     }
     
     // Obtener historial de conversación privada
-    public static List<String> getPrivateHistory(String user1, String user2) {
+    public static synchronized List<String> getPrivateHistory(String user1, String user2) {
         File historyFile = getPrivateHistoryFile(user1, user2);
         return readHistoryFromFile(historyFile);
     }
     
     // Obtener historial de grupo
-    public static List<String> getGroupHistory(String groupName) {
+    public static synchronized List<String> getGroupHistory(String groupName) {
         File historyFile = getGroupHistoryFile(groupName);
         return readHistoryFromFile(historyFile);
     }
     
     // Métodos auxiliares
-    private static File getPrivateHistoryFile(String user1, String user2) {
+    private static synchronized File getPrivateHistoryFile(String user1, String user2) {
         // Crear nombre consistente para la conversación (orden alfabético)
         List<String> users = Arrays.asList(user1, user2);
         Collections.sort(users);
@@ -85,22 +85,24 @@ public class MessageHistory {
         return new File(HISTORY_DIR, fileName);
     }
     
-    private static File getGroupHistoryFile(String groupName) {
+    private static synchronized File getGroupHistoryFile(String groupName) {
         String fileName = "group_" + groupName + ".txt";
         return new File(HISTORY_DIR, fileName);
     }
     
-    private static void appendToFile(File file, String content) {
-        try (FileWriter fw = new FileWriter(file, true);
-             BufferedWriter bw = new BufferedWriter(fw)) {
+    private static synchronized void appendToFile(File file, String content) {
+        try (FileOutputStream fos = new FileOutputStream(file, true); // 👈 CAMBIO A FileOutputStream
+         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
             bw.write(content);
             bw.flush();
+
+            fos.getFD().sync();
         } catch (IOException e) {
             System.err.println("Error al guardar en historial: " + e.getMessage());
         }
     }
     
-    private static List<String> readHistoryFromFile(File file) {
+    private static synchronized List<String> readHistoryFromFile(File file) {
         List<String> history = new ArrayList<>();
         if (!file.exists()) return history;
         
@@ -115,7 +117,7 @@ public class MessageHistory {
         return history;
     }
     
-    private static File copyAudioToHistory(File sourceAudio, String sender, String destination, 
+    private static synchronized File copyAudioToHistory(File sourceAudio, String sender, String destination, 
                                          String timestamp, boolean isGroup) {
         String cleanTimestamp = timestamp.replace(":", "-").replace(" ", "_");
         String prefix = isGroup ? "group_" + destination : "private_" + sender + "_" + destination;
