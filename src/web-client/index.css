@@ -78,21 +78,30 @@ body {
     min-height: 20px;
 }
 
-/* Chat Container */
 .chat-container {
     display: flex;
     height: 100vh;
+    width: 100%;
     background: white;
+    overflow-x: hidden;
 }
 
-/* Sidebar */
 .sidebar {
     width: 320px;
+    min-width: 250px;
     background: #1a1a2e;
     color: white;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #16213e;
+}
+
+.main-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f7;
+    overflow: hidden;
 }
 
 .sidebar-header {
@@ -141,21 +150,21 @@ body {
     padding: 15px;
     border-top: 1px solid #0f3460;
 }
-.create-group-btn, .delete-group-btn {
-    width: 100%;                /* Ensure both buttons take up full width */
-    padding: 12px;              /* Same padding for both */
-    font-size: 16px;            /* Same font size for both */
-    display: flex;              /* Flexbox to align the content inside */
-    align-items: center;        /* Vertically center the icon and text */
-    justify-content: center;    /* Horizontally center the content */
-    gap: 8px;                   /* Space between the icon and text */
-    border-radius: 8px;         /* Same border radius for both buttons */
-    cursor: pointer;           /* Show pointer cursor when hovered */
-    border: none;               /* Remove any default borders */
-    transition: all 0.3s;       /* Smooth transition for hover effects */
+
+.create-group-btn,
+.delete-group-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
 }
-
-
 
 .create-group-btn:hover {
     background: #0051d5;
@@ -170,6 +179,7 @@ body {
 .chat-list-header {
     font-size: 12px;
     font-weight: 600;
+    padding-top: 15px;
     color: #8e8e93;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -203,13 +213,6 @@ body {
     justify-content: center;
 }
 
-/* Main Chat Area */
-.main-chat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #f5f5f7;
-}
 
 .chat-header {
     padding: 20px;
@@ -562,24 +565,126 @@ body {
     background: #c1271f;
 }
 
-/* Icons (using Unicode) */
-.icon-user::before { content: "👤"; }
-.icon-group::before { content: "👥"; }
-.icon-send::before { content: "📤"; }
-.icon-history::before { content: "📋"; }
-.icon-logout::before { content: "🚪"; }
-.icon-message::before { content: "💬"; }
-.icon-trash::before { content: "🗑️"; }
+.icon-user::before {content: "👤";}
+.icon-group::before {content: "👥";}
+.icon-send::before {content: "📤";}
+.icon-history::before {content: "📋";}
+.icon-logout::before {content: "🚪";}
+.icon-message::before {content: "💬";}
+.icon-trash::before {content: "🗑️";}
 
-/* Example responsive icon size */
 @media (max-width: 768px) {
-    .icon-user, .icon-group, .icon-send, .icon-history, .icon-logout, .icon-message {
-        font-size: 18px; /* Smaller icons on mobile */
+
+    .icon-user,
+    .icon-group,
+    .icon-send,
+    .icon-history,
+    .icon-logout,
+    .icon-message,
+    .icon-trash {
+        font-size: 18px;
     }
 }
 
 @media (max-width: 480px) {
-    .icon-user, .icon-group, .icon-send, .icon-history, .icon-logout, .icon-message {
-        font-size: 16px; /* Even smaller on very small screens */
+
+    .icon-user,
+    .icon-group,
+    .icon-send,
+    .icon-history,
+    .icon-logout,
+    .icon-message,
+    .icon-trash {
+        font-size: 16px;
     }
+}
+
+
+/* 1. Pantallas de Tablets y Pequeñas Laptops (Max Width 850px) */
+@media (max-width: 850px) {
+
+    /* Main Chat (Permitir el desbordamiento horizontal en caso de URLs largas) */
+    .main-chat {
+        overflow-x: auto;
+    }
+
+    /* Message (Usar más espacio horizontal) */
+    .message {
+        max-width: 85%;
+    }
+}
+
+/* 2. Pantallas de Móviles (Max Width 600px) */
+@media (max-width: 600px) {
+
+    /* Contenedor Principal: Cambiar a disposición de una sola columna 
+       y ocultar la barra lateral por defecto (la funcionalidad JS debe manejar su visibilidad) */
+    .chat-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* Sidebar: Ocupar todo el ancho y establecer una altura fija para que no tape todo */
+    .sidebar {
+        width: 100%;
+        height: 220px;
+        /* Altura más corta para mostrar el chat */
+        min-width: 100%;
+        position: relative;
+        /* Puedes añadir aquí display: none; y usar JS para mostrarlo/ocultarlo, 
+           pero por CSS lo dejamos con altura fija */
+    }
+
+    /* Content: Hacer que la lista de chat tome todo el espacio restante */
+    .chat-list-section {
+        flex-basis: auto;
+    }
+
+    /* Main Chat Area: Ocupar todo el ancho */
+    .main-chat {
+        width: 100%;
+        flex: 1;
+    }
+
+    /* Message Input: Asegurar que el input container use todo el ancho */
+    .input-container {
+        padding: 10px;
+        /* Reducir padding en móvil */
+    }
+
+    /* Message Input Field: Ajustar el tamaño del texto y padding */
+    .message-input {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    /* Send Button: Hacer que el botón de enviar sea más compacto */
+    .send-btn {
+        padding: 10px 14px;
+        font-size: 14px;
+        width: auto;
+        /* Fijar ancho para evitar que se estire demasiado */
+    }
+
+    /* Header del Chat: Reducir padding */
+    .chat-header {
+        flex-direction: column; /* Apila los elementos */
+        align-items: flex-start;
+        padding: 10px;
+    }
+    .chat-header-info {
+        margin-bottom: 10px;
+    }
+
+    /* Mensajes: Usar el máximo ancho permitido */
+    .message {
+        max-width: 95%;
+        padding: 10px 14px;
+    }
+
+    .input-wrapper {
+        gap: 5px; /* Reduce el espacio entre el input y el botón */
+    }
+    
 }

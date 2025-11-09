@@ -1,224 +1,321 @@
-# Multiple Client Hub - Sistema de Chat con Cliente Web
+# Multiple Client Hub — Chat (Java backend + proxy HTTP + cliente web)
 
-## Descripción General
-Este proyecto es una aplicación de chat que soporta tanto clientes Java como web, permitiendo la comunicación entre usuarios a través de mensajería de texto y llamadas de audio. El sistema está estructurado en tres módulos principales:
-- **Cliente Java**: Implementación original con soporte completo de funcionalidades
-- **Cliente Web**: Nueva implementación HTTP para funciones básicas de chat
-- **Servidor**: Backend en Java que maneja la lógica central del sistema
+## Equipo
 
-El sistema utiliza una combinación de protocolos TCP/IP para el cliente Java y HTTP para el cliente web, con un proxy que traduce las peticiones entre ambos.
+- Samuel Gallego
+- Anderson Romero
+- Daniel Martínez
+- David Chicué
+
+## Resumen (versión actual del proyecto)
+Este repositorio contiene un sistema de chat con tres partes principales:
+
+- Backend Java (TCP): la implementación del servidor original, diseñada para comunicarse exclusivamente por sockets TCP, que gestiona usuarios, grupos, historial y transferencia de audios. Código en `src/main/java/com/icesi/chatapp/Server`.
+- Proxy HTTP (Node/Express): un servidor intermedio que recibe peticiones HTTP desde el cliente web y traduce/encola comandos al servidor Java mediante sockets TCP. Código en `src/rest-api/src`.
+- Cliente Web (HTML/CSS/JavaScript): cliente ligero implementado en archivos estáticos (no usa React). Archivos principales en `src/web-client/` (`index.html`, `index.js`, `index.css`).
+
+El objetivo de esta versión es permitir que un cliente web interactúe con el backend Java mediante un proxy que transforma peticiones HTTP a los mensajes TCP que entiende el servidor original.
 
 ---
 
-## Estructura del Proyecto
+## Estructura relevante (resumen)
 
 ```
 src/
-├── main/java/com/icesi/chatapp/          # Backend Java
-│   ├── Client/                           # Cliente Java original
-│   │   ├── AudioCallReceiver.java
-│   │   ├── AudioCallSender.java
-│   │   ├── AudioPlayer.java
-│   │   ├── AudioSender.java
-│   │   ├── Client.java
-│   │   └── ClientAudioReceiver.java
-│   └── Server/                           # Servidor Java
-│       ├── ClientHandler.java
-│       ├── MessageHistory.java
-│       └── Server.java
-├── rest-api/                             # Servidor proxy HTTP
-│   ├── src/
-│   │   ├── index.js                      # Punto de entrada del proxy
-│   │   └── services/
-│   │       └── delegateService.js        # Servicios de traducción HTTP-TCP
-│   └── package.json
-└── web-client/                           # Cliente web React
-    ├── src/
-    │   ├── pages/
-    │   │   └── ChatApp.js               # Componente principal del chat
-    │   └── components/                   # Componentes reutilizables
-    ├── index.html
-    └── package.json
+├─ main/java/com/icesi/chatapp/Server/     # Backend Java (TCP)
+│   ├─ Server.java                         # Servidor TCP Principal. Gestiona las conexiones de socket TCP y 
+│   │                                     # el manejo de clientes (proxies) adaptados.
+│   └─ MessageHistory.java                 # Maneja la persistencia de mensajes (lectura/escritura) en archivos 
+│                                         # locales de forma sincronizada.
+├─ rest-api/                               # Proxy HTTP (Node/Express)
+│   └─ src/
+│      ├─ index.js                         # Entrypoint principal del proxy Express. Define y maneja los endpoints HTTP.
+│      └─ services/delegateService.js      # Módulo clave. Funciona como cliente TCP que traduce las peticiones 
+│                                         # HTTP a los comandos de socket TCP que espera el servidor Java.
+└─ web-client/                              # Cliente web (HTML/CSS/JS)
+   ├─ index.html                            # Estructura base de la aplicación y punto de carga inicial de scripts.
+   ├─ index.js                              # Entrypoint y lógica principal del cliente (p. ej., inicialización, event listeners globales).
+   ├─ index.css                             # Estilos globales y diseño responsivo de la aplicación.
+   └─ (otros archivos estáticos)
+   ├─ services/
+   │   └─ chatService.js                    # Abstracción de la comunicación. Funciones para peticiones HTTP a los endpoints del proxy.
+   ├─ pages/
+   │   ├─ ChatApp.js                        # Manejo del estado, lógica y renderizado de la interfaz de chat principal.
+   │   └─ Home.js                           # Manejo del estado y renderizado de la vista de inicio de sesión/registro.
+   └─ router/
+       ├─ Router.js                         # Módulo encargado de gestionar y cambiar la vista (entre Home y ChatApp).
+       └─ routes.js                         # Define el mapa de rutas y qué componente de "page" se debe renderizar para cada ruta.
 ```
 
-### Carpetas y Archivos Clave
-- **Client/**: Lógica del cliente, manejo de mensajes, llamadas y audio.
-- **Server/**: Lógica del servidor, gestión de clientes, historial y mensajes.
-- **audios_recibidos/**: Audios recibidos por los clientes.
-- **server_audios/**: Audios almacenados en el servidor.
-- **chat_history/**: Historial de chats grupales y privados.
+### Notas sobre el cliente web
+- El cliente web es una aplicación estática en HTML/CSS/JS que se comunica mediante HTTP con el proxy.
+- No se requiere React ni build step complejo; se puede servir como archivos estáticos.
 
 ---
 
-## Descripción de Componentes
+## Endpoints principales del proxy (resumen)
 
-### Módulo Cliente (`Client/`)
-- **Client.java**: Punto de entrada del cliente. Gestiona la conexión al servidor, envío y recepción de mensajes.
-- **AudioCallSender.java**: Envía audio en tiempo real al servidor durante una llamada.
-- **AudioCallReceiver.java**: Recibe y reproduce audio de una llamada entrante.
-- **AudioPlayer.java**: Reproduce archivos de audio recibidos.
-- **AudioSender.java**: Envía archivos de audio grabados al servidor.
-- **ClientAudioReceiver.java**: Recibe archivos de audio enviados por otros usuarios.
+El proxy expone endpoints HTTP que el cliente web usa. Algunos endpoints disponibles:
 
-### Módulo Servidor (`Server/`)
-- **Server.java**: Punto de entrada del servidor. Acepta conexiones de clientes y distribuye mensajes.
-- **ClientHandler.java**: Hilo dedicado a cada cliente conectado. Gestiona mensajes, llamadas y archivos de audio.
-- **MessageHistory.java**: Maneja el almacenamiento y recuperación del historial de mensajes (grupales y privados).
+- POST /api/login
+- POST /api/messages/private  { username, recipient, message }
+- POST /api/messages/group    { username, groupName, message }
+- POST /api/groups            { username, groupName, members }
+- GET  /api/available/:username    -> devuelve usuarios y grupos disponibles
+- GET  /api/history/private/:username/:otherUser
+- GET  /api/history/group/:username/:groupName
+- DELETE /api/groups/:name
+
+Los parámetros están documentados en los controladores bajo `src/rest-api/src/index.js`.
 
 ---
 
-## Instrucciones de Uso
+## Requisitos
 
-### 1. Requisitos Previos
-- Java 25 o superior (Cambiar la versión de la Máquina en build.gradle)
-- Gradle (o usar los scripts `gradle`/`gradlew.bat` incluidos)
-- Node.js 14 o superior
-- npm o yarn
+- Java 25+ (se recomienda Java 17+)
+- Gradle (o usar `gradlew` incluido)
+- Node.js 25+ y npm
 
-### 2. Instalación y Configuración
+---
 
-#### Backend Java
-Desde la raíz del proyecto, ejecuta:
+## Pasos para ejecutar (Windows PowerShell)
 
-**En Windows:**
-```
-gradlew.bat build
-```
-**En Linux/Mac:**
-```
-./gradle build
+1) Compilar el backend Java
+
+```powershell
+.
+# Desde la raíz del repositorio
+.\gradlew clean build
 ```
 
-#### Servidor Proxy HTTP
-```bash
-cd src/rest-api
-npm install
-```
+2) Ejecutar el servidor Java
 
-#### Cliente Web
-```bash
-cd src/web-client
-npm install
-```
-
-### 3. Ejecución del Sistema
-
-#### a) Iniciar el Servidor Java
-```bash
+```powershell
 java -cp build/classes/java/main com.icesi.chatapp.Server.Server
 ```
 
-#### b) Iniciar el Servidor Proxy
-```bash
-cd src/rest-api
-npm start
+3) Iniciar el proxy HTTP
+
+```powershell
+cd .\src\rest-api
+npm install
+node src/index.js
 ```
 
-#### c) Iniciar el Cliente Web
-```bash
-cd src/web-client
-npm start
+4) Servir el cliente web (archivos estáticos)
+
+Usar `npx serve`
+
+```powershell
+cd .\src\web-client
+npx serve -s -l 3001
+# luego abrir http://localhost:3001
 ```
-
-#### d) (Opcional) Iniciar Cliente Java
-```bash
-java -cp build/classes/java/main com.icesi.chatapp.Client.Client
-```
-
-### 4. Funcionalidades
-
-#### Cliente Web (HTTP)
-- **Mensajería privada**: Envío de mensajes entre usuarios
-- **Grupos de chat**: Creación y mensajería grupal
-- **Historial**: Visualización de mensajes anteriores
-- **Interfaz intuitiva**: Diseño moderno y responsive
-
-#### Cliente Java (Original)
-- **Todas las funciones del cliente web**
-- **Llamadas de audio**: Comunicación por voz en tiempo real
-- **Notas de voz**: Envío y reproducción de mensajes de audio
-- **Gestión avanzada de grupos**: Más opciones de administración
-
-### 5. Archivos Generados
-- **chat_history/**: Historial de mensajes
-- **server_audios/**: Audios almacenados (cliente Java)
-- **audios_recibidos/**: Audios recibidos (cliente Java)
 
 ---
 
-## Notas Adicionales
-- Asegúrate de que el puerto utilizado por el servidor esté libre.
-- Puedes modificar la configuración de red (puerto, IP) en los archivos fuente si es necesario.
-- Para pruebas locales, ejecuta servidor y clientes en la misma máquina.
+## Descripción Detallada del Flujo de Comunicación
+
+### 1. Flujo de Autenticación
+
+[![](https://mermaid.ink/img/pako:eNplkMFOg0AQhl9lMlexLSqU3UMveDBeJIXExPSywpRuLLu4LE1bwiN58hH6Yi4lVZPOaefP9_8zOx3muiDkuFINfbakcnqUojSiWilwVQtjZS5roSzEIBqIt5KUJXil92siGYjE6P0BnrIsuQbSAUjJ7GShDTyLnRiZ-HaxSDgkL2kGU1HL6VaXUkHXNmSUqKgfscRhKYdYK9rL07eCLE7gBkjtTl8aLvDIpmOkY9fSVCIf-OmS8o046r-0mMOSmrqlxorzzpBrBUNXaPSwNLJAbk1LHlbkYoYWu8G_QrshNwy5exbCfKzcDXvncR9907q62Ixuyw3ytdg2rmvrQtjLiX9VQ6ogE-tWWeRzPziHIO9wj9z3w8mcMT8KwuDunkWMeXgY5TCaP0QRC2Z-yIKo9_B4njubOJ39r_4H232bxg?type=png)](https://mermaid.live/edit#pako:eNplkMFOg0AQhl9lMlexLSqU3UMveDBeJIXExPSywpRuLLu4LE1bwiN58hH6Yi4lVZPOaefP9_8zOx3muiDkuFINfbakcnqUojSiWilwVQtjZS5roSzEIBqIt5KUJXil92siGYjE6P0BnrIsuQbSAUjJ7GShDTyLnRiZ-HaxSDgkL2kGU1HL6VaXUkHXNmSUqKgfscRhKYdYK9rL07eCLE7gBkjtTl8aLvDIpmOkY9fSVCIf-OmS8o046r-0mMOSmrqlxorzzpBrBUNXaPSwNLJAbk1LHlbkYoYWu8G_QrshNwy5exbCfKzcDXvncR9907q62Ixuyw3ytdg2rmvrQtjLiX9VQ6ogE-tWWeRzPziHIO9wj9z3w8mcMT8KwuDunkWMeXgY5TCaP0QRC2Z-yIKo9_B4njubOJ39r_4H232bxg)
+
+1. El cliente web envía credenciales vía HTTP POST
+2. El proxy establece conexión TCP persistente con el servidor
+3. El servidor valida y responde
+4. El proxy mantiene la conexión TCP activa para futuras peticiones
+
+### 2. Flujo de Mensajería Privada
+
+[![](https://mermaid.ink/img/pako:eNplkMFuwjAMhl_F8nUMKFtpmwOX7jBtB6oVadLUi9cayEaTLkkRDPFUe4S92FIqxgGfYvv7_9g-YKkrRoGWv1pWJT9IWhmqCwU-GjJOlrIh5SAFspBuJCvH8Mrv10TWEZnRuz08LhbZNZB3QM5mKytt4Im21DPp7WyWCcjm-QJG1MhRzdbSiu2oMXJLjnss81guINU1qUrDIs2gwKBAuIGKnLY9lfeUn6NkS1CzsvTBl17WOailNDWV8vdHXbxTAS9sm5ato9MGMBmPYf6MA1wZWaFwpuUB1uylXYqHTlugW3PNBQr_rMh8Flioo9f4ld-0rs8yo9vVGsWSNtZnbeNHPh_7v2pYVWxS3SqHIgqSkwmKA-5QBMF0GCVJEIfTcHKXxInv7vvyNI7u4zgJx8E0CePjAL9P_46HcRQe_wDH-ZZ4?type=png)](https://mermaid.live/edit#pako:eNplkMFuwjAMhl_F8nUMKFtpmwOX7jBtB6oVadLUi9cayEaTLkkRDPFUe4S92FIqxgGfYvv7_9g-YKkrRoGWv1pWJT9IWhmqCwU-GjJOlrIh5SAFspBuJCvH8Mrv10TWEZnRuz08LhbZNZB3QM5mKytt4Im21DPp7WyWCcjm-QJG1MhRzdbSiu2oMXJLjnss81guINU1qUrDIs2gwKBAuIGKnLY9lfeUn6NkS1CzsvTBl17WOailNDWV8vdHXbxTAS9sm5ato9MGMBmPYf6MA1wZWaFwpuUB1uylXYqHTlugW3PNBQr_rMh8Flioo9f4ld-0rs8yo9vVGsWSNtZnbeNHPh_7v2pYVWxS3SqHIgqSkwmKA-5QBMF0GCVJEIfTcHKXxInv7vvyNI7u4zgJx8E0CePjAL9P_46HcRQe_wDH-ZZ4)
+
+1. Cliente envía mensaje a través del endpoint HTTP
+2. Proxy traduce a formato TCP y envía
+3. Servidor procesa y distribuye
+4. Respuesta regresa por la cadena
+
+### 3. Flujo de Grupos
+
+[![](https://mermaid.ink/img/pako:eNplkE1PwzAMhv-K5StlWze6tjnsUg4IIVHRSkiol9CYLqJJSppOG9P-O-k-AGk-xa8fv7G9x9oIQoY9fQ2ka7qXvLFcVRp8dNw6WcuOawcZ8B6yVpJ2BK_0fk3kI5Fbs93BQ1nm10AxAgXZjRTGwiPf8BOT3a5WOYP8uShhyjs5bawZuv5UzH2xYJAZxbUwUGY5VDivEG5AcGfOVHGmLHFo7NCZP9k7P8necRAESpJ6t-afdcbghfpuoJEYx4baaI863rbUY4CNlQKZswMFqMgqPqa4Hx0qdGtSVCHzT8HtZ4WVPvgev-2bMerS5rdp1sg-eNv7bOj83Jc7_6qWtCCbmUE7ZPF8cTRBtsctsjBcTuI0DZNoGc0XaZKmAe5O8jKJ75IkjWbhMo2SQ4Dfx39nkySODj_Ol5Rx?type=png)](https://mermaid.live/edit#pako:eNplkE1PwzAMhv-K5StlWze6tjnsUg4IIVHRSkiol9CYLqJJSppOG9P-O-k-AGk-xa8fv7G9x9oIQoY9fQ2ka7qXvLFcVRp8dNw6WcuOawcZ8B6yVpJ2BK_0fk3kI5Fbs93BQ1nm10AxAgXZjRTGwiPf8BOT3a5WOYP8uShhyjs5bawZuv5UzH2xYJAZxbUwUGY5VDivEG5AcGfOVHGmLHFo7NCZP9k7P8necRAESpJ6t-afdcbghfpuoJEYx4baaI863rbUY4CNlQKZswMFqMgqPqa4Hx0qdGtSVCHzT8HtZ4WVPvgev-2bMerS5rdp1sg-eNv7bOj83Jc7_6qWtCCbmUE7ZPF8cTRBtsctsjBcTuI0DZNoGc0XaZKmAe5O8jKJ75IkjWbhMo2SQ4Dfx39nkySODj_Ol5Rx)
+
+1. Cliente solicita crear/gestionar grupo
+2. Proxy traduce a comandos TCP
+3. Servidor actualiza estructuras de datos
+4. Respuesta incluye estado actual
+
+### 4. Gestión de Sesiones
+- El proxy mantiene un mapa de conexiones TCP activas
+- Cada usuario tiene su propia conexión persistente
+- Las sesiones se limpian al detectar desconexiones
+- Opción de Recargar los chats sin recargar la página.
+
+### 5. Manejo de Errores
+- Excepciones cuando se ingresan usuarios con el mismo nombre por SessionId generado Automaticamente
+- Aforo Minimo de Grupos de 2 personas.
+- No se permite Crear Grupos con usuarios Inexistentes.
+- Reintentos automáticos de conexión TCP
+- Timeout configurable en peticiones HTTP
+- Fallback a almacenamiento local si falla DB.
 
 ---
 
-## Créditos
-Desarrollado por el equipo de:
+## Ventajas de la Estructura y Diseño
 
-- Samuel Gallego
+### 1. Estructura de Archivos Modular
+La organización actual del proyecto ofrece varias ventajas clave:
 
-- Anderson Romero
+1. **Separación de Responsabilidades**
+   - `src/web-client/`: Interfaz de usuario y lógica del cliente
+   - `src/rest-api/`: Capa de proxy y transformación de protocolos
+   - `src/main/java/`: Lógica del servidor y persistencia
+   Esta separación permite:
+   - Desarrollo paralelo de componentes
+   - Pruebas independientes de cada capa
+   - Mantenimiento más sencillo
+   - Escalabilidad por componente
 
-- Daniel Martínez
+2. **Estructura de Servicios**
+   - Los servicios están organizados en carpetas dedicadas
+   - Cada servicio tiene una responsabilidad única
+   - Facilita la adición de nuevas funcionalidades
+   - Permite versionado independiente
 
-- David Chicué
+3. **Gestión de Dependencias**
+   - Cada componente maneja sus propias dependencias
+   - Evita conflictos entre versiones
+   - Facilita actualizaciones parciales
+   - Reduce el acoplamiento entre componentes
 
-Para la clase de Computación en Internet 1(Universidad Icesi).
+### 2. Generación Dinámica de HTML
+La decisión de generar el HTML mediante JavaScript ofrece ventajas significativas:
+
+1. **Flexibilidad y Mantenibilidad**
+   - Permite actualizar la interfaz sin recargar la página
+   - Facilita la creación de componentes reutilizables
+   - Reduce la duplicación de código
+   - Permite inyección condicional de elementos
+
+2. **Mejor Experiencia de Usuario**
+   - Actualizaciones parciales más eficientes
+   - Transiciones y animaciones más fluidas
+   - Mejor respuesta a interacciones del usuario
+   - Carga inicial más rápida de la estructura base
+
+3. **Control Programático**
+   - Validación de datos antes de mostrar
+   - Transformación de datos en tiempo real
+   - Gestión de estados de UI más robusta
+   - Mejor manejo de errores y casos extremos
+
+### 3. Capa de Servicios (chatService.js)
+El archivo `chatService.js` actúa como una capa de abstracción crucial:
+
+```javascript
+src/web-client/
+└── src/
+    └── services/
+        └── chatService.js   # Abstracción de comunicación HTTP
+```
+
+**Funcionalidades Principales:**
+1. **Gestión de Usuarios**
+   - `registerUser(username, sessionId)`: Registro con manejo de sesiones
+   - `getConnectedUsers()`: Lista usuarios activos
+
+2. **Mensajería**
+   - `sendPrivateMessage(sender, recipient, message)`
+   - `sendGroupMessage(sender, groupName, message)`
+   - `getPrivateHistory(currentUser, user)`
+   - `getGroupHistory(name)`
+
+3. **Gestión de Grupos**
+   - `createGroup(groupName, users)`
+   - `deleteGroup(groupName)`
+   - `getAllGroups()`
+
+**Ventajas de esta Abstracción:**
+- Encapsula toda la lógica de comunicación HTTP
+- Manejo consistente de errores y respuestas
+- Facilita cambios en la API subyacente
+- Proporciona una interfaz limpia para la UI
 
 ---
 
-## Elección de protocolos por funcionalidad
+## Diseño e Interfaz de Usuario
 
-Esta sección explica qué protocolos son recomendables para cada funcionalidad del sistema, por qué y qué implicaciones tiene su uso en la implementación.
+### Aspectos Visuales
+1. **Diseño Responsivo**
+   - Layout fluido que se adapta a diferentes tamaños de pantalla
+   - Breakpoints para móvil, tablet y desktop
+   - Fuentes escalables y espaciado relativo
 
-## 1) Mensajería de texto (chat grupal y privado)
-- Protocolo recomendado: TCP (sockets Java tradicionales) o WebSocket
-- Por qué: La mensajería de texto requiere entrega fiable y ordenada. TCP garantiza ambos y es fácil de usar con sockets Java existentes. WebSocket es útil si se planea exponer una interfaz web o clientes JavaScript en el futuro.
+2. **Sistema de Colores**
+   - Paleta principal: Azules profesionales (#2196f3, #1976d2)
+   - Mensajes enviados: Fondo azul claro (#e3f2fd)
+   - Mensajes recibidos: Gris suave (#f5f5f5)
+   - Indicadores de estado y alertas
 
-## 2) Envío y transferencia de archivos (audios grabados)
-- Protocolo recomendado: TCP
-- Por qué: La transferencia de archivos requiere integridad completa; TCP administra retransmisión de paquetes y garantiza la entrega completa del archivo.
+3. **Elementos de UI**
+   - Botones con feedback visual al hover/click
+   - Campos de entrada con validación visual
+   - Indicadores de carga durante operaciones
+   - Notificaciones toast para feedback
 
-## 3) Audio en tiempo real (streaming, llamadas de audio)
-- Protocolo recomendado: UDP con RTP (Real-time Transport Protocol) o directamente UDP para simplicidad; como alternativa WebRTC para navegadores.
-- Por qué: Las llamadas de audio en tiempo real priorizan la latencia sobre la entrega completa. UDP evita la latencia introducida por retransmisiones de TCP. RTP añade temporización, secuenciación y marcas de tiempo útiles para la reconstrucción del flujo de audio.
-- Consideraciones:
-  - Debes introducir un buffer de playback y manejo de jitter en el cliente (`AudioCallReceiver` / `AudioPlayer`).
-  - Implementa detección de pérdida de paquetes y técnicas de concealment o FEC si la calidad es crítica.
-  - Para comunicación segura, combinar con SRTP (Secure RTP) o tunelizar sobre DTLS (como hace WebRTC).
+### Mejoras Estructurales
+1. **Organización de Código**
+   - Separación clara de responsabilidades (HTML/CSS/JS)
+   - Componentes modulares y reutilizables
+   - Nomenclatura consistente de clases CSS
 
-4) Señalización para llamadas (establecer/terminar llamada, intercambio de metadatos)
-- Protocolo recomendado: TCP (mensajería) o WebSocket
-- Por qué: La señalización requiere entrega fiable de mensajes de control (invitar a llamada, aceptar, colgar). TCP o WebSocket proveen fiabilidad y facilidad de integración con la lógica existente.
-- Consideraciones:
-  - Separar la señalización del canal de audio (ej. señalización por TCP + media por UDP/RTP).
+2. **Performance**
+   - Carga diferida de historiales
+   - Caché de usuarios y grupos
+   - Optimización de peticiones HTTP
 
-5) Historial y almacenamiento (logs de chat, archivos en servidor)
-- Protocolo recomendado: TCP (para transferencia confiable entre cliente/servidor) y acceso local a disco en el servidor
-- Por qué: El almacenamiento de historial y archivos debe garantizar que los datos no se corrompan; TCP es apropiado para transmitir dichos datos y luego guardarlos en disco.
 
-  ---
+### Innovaciones
+1. **Interfaz Contextual**
+   - Menú adaptativo según el contexto
+   - Accesos rápidos personalizados
+   - Historial inteligente
 
-  ## Uso de PostgreSQL 
+2. **Gestión de Estado**
+   - Persistencia local de preferencias
+   - Sincronización de estado cliente-servidor
+   - Recuperación ante desconexiones
 
-  Para Consultar el almacenamiento de historial y metadatos de audio a una base de datos PostgreSQL en pgAdmin4, sigue estos pasos.
+3. **Accesibilidad**
+   - Soporte para lectores de pantalla
+   - Navegación por teclado
+   - Alto contraste configurable
+   - Textos alternativos
 
-  1) Instalar PostgreSQL
-  - En Windows descarga e instala desde https://www.postgresql.org/download/windows/ y crea una base de datos (por ejemplo `chatapp`) y un usuario con permisos.
+---
 
-  2) Configura la BD
-  - En la clase Database.java están las credenciales de acceso a la base de datos. 
- ```powershell
-        String dbHost = "192.168.1.10"; 
-        int dbPort = 5432;
-        String dbName = "chatdb";
-        String dbUser = "chat";
-        String dbPassword = "chatpass";
-  ```
-  3) Inicializar tablas
-  - La aplicación intentará crear las tablas `messages` y `audio_files` automáticamente al iniciarse si `DB_URL` está presente en las variables de entorno(Ya están creadas y disponibles para su consulta usando las sentencias SQL: SELECT * FROM table_name O SELECT name FROM table_name WHERE id = 2 ).
+**Futuras Mejoras y Roadmap (Características No Implementadas)**
 
-  4) Comprobaciones y notas
-  - Si la BD no está disponible o ocurre un error, la aplicación seguirá funcionando con el almacenamiento por archivos (fallback).
- 
+Esta sección ahora lista las funcionalidades que no están operativas en la versión actual, incluyendo las características de UX que mencionaste.
+
+ - UX Mejorada (Pendiente de Implementación)
+ - Autocompletado de usuarios en el campo de texto.
+
+ - Preview de mensajes antes de enviar.
+
+ - Indicadores de escritura ("Escribiendo...").
+
+ - Confirmación visual de envío (más allá de la limpieza del input).
+
+ - Integración con el RPC de ICE.
+
+ - Integración de Llamadas y Mensajes de Voz tipo WhatsApp, Telegram etc.
+
+---
+
+## Limitaciones y notas
+
+- Las funcionalidades en tiempo real (llamadas de audio, streaming de audio en vivo) no están implementadas en la versión HTTP del cliente. Estas requieren comunicación persistente (WebSocket/WebRTC/UDP) y se implementarán más adelante al integrar el Internet Communications Engine (ICE) por ZeroC.
+- La lógica y estructuras de datos del servidor Java se conservan intactas; el proxy solo traduce formatos de comunicación de peticiones HTTP a TCP.
+- Si el proxy o el servidor Java cambian el formato de texto esperado, hay que sincronizar `src/rest-api/src/index.js` y `src/rest-api/src/services/delegateService.js`.
+
+
+

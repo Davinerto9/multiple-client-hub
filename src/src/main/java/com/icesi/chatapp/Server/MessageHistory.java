@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class MessageHistory {
-    private static final String HISTORY_DIR = "chat_history";
-    private static final String AUDIO_HISTORY_DIR = "audio_history";
+    private static final String HISTORY_DIR = "src/chat_history";
+    private static final String AUDIO_HISTORY_DIR = "src/audio_history";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // Inicializar directorios
@@ -88,7 +88,7 @@ public class MessageHistory {
     }
 
     private static synchronized void appendToFile(File file, String content) {
-        try (FileOutputStream fos = new FileOutputStream(file, true); // 👈 CAMBIO A FileOutputStream
+        try (FileOutputStream fos = new FileOutputStream(file, true);
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos))) {
             bw.write(content);
             bw.flush();

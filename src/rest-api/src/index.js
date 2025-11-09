@@ -24,7 +24,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ✅ Get connected users (NUEVO)
+// Get connected users
 app.get('/users', async (req, res) => {
     try {
         console.log('GET /users - Solicitando usuarios conectados');
@@ -43,7 +43,7 @@ app.get('/users', async (req, res) => {
     }
 });
 
-// ✅ Get all groups (NUEVO)
+// Get all groups
 app.get('/groups', async (req, res) => {
     try {
         console.log('GET /groups - Solicitando grupos');
@@ -62,7 +62,7 @@ app.get('/groups', async (req, res) => {
     }
 });
 
-// ✅ Create a group
+// Create a group
 app.post('/groups', async (req, res) => {
     try {
         const { groupName, users } = req.body;
@@ -85,18 +85,16 @@ app.post('/groups', async (req, res) => {
     }
 });
 
-// ✅ Send private message
+// Send private message
 app.post('/private', async (req, res) => {
     try {
-        // 👇 AÑADE 'sender' AQUÍ
         const { sender, recipient, message } = req.body;
 
-        if (!sender || !recipient || !message) { // 👈 AÑADE 'sender'
+        if (!sender || !recipient || !message) {
             return res.status(400).json({ error: 'Sender, recipient and message are required' });
         }
 
         console.log(`POST /private - ${sender} -> ${recipient}`);
-        // 👇 PASA 'sender' AL DELEGADO
         const response = await delegate.sendPrivateMessage(sender, recipient, message);
 
         if (response.status === 'ok') {
@@ -110,13 +108,12 @@ app.post('/private', async (req, res) => {
     }
 });
 
-// ✅ Send group message
+//Send group message
 app.post('/group', async (req, res) => {
     try {
-        // 👇 AÑADE 'sender' AQUÍ
         const { sender, groupName, message } = req.body;
 
-        if (!sender || !groupName || !message) { // 👈 AÑADE 'sender'
+        if (!sender || !groupName || !message) {
             return res.status(400).json({ error: 'Sender, group name and message are required' });
         }
 
@@ -135,7 +132,7 @@ app.post('/group', async (req, res) => {
 });
 
 
-// ✅ Get group history
+// Get group history
 app.get('/group/:name', async (req, res) => {
     try {
         const groupName = req.params.name;
@@ -144,7 +141,7 @@ app.get('/group/:name', async (req, res) => {
             return res.status(400).json({ error: 'Group name parameter is required' });
         }
 
-        console.log('📥 GET /group/:name - Getting history for group:', groupName);
+        console.log('GET /group/:name - Getting history for group:', groupName);
         const response = await delegate.getGroupHistory(groupName);
 
         if (response.status === 'ok' && response.history) {
@@ -153,8 +150,8 @@ app.get('/group/:name', async (req, res) => {
             res.status(200).json([]);
         }
     } catch (err) {
-        console.error('❌ Error getting group history:', err);
-        res.status(200).json([]); // Retornar array vacío
+        console.error('Error getting group history:', err);
+        res.status(200).json([]);
     }
 });
 
@@ -185,7 +182,7 @@ app.get('/private/:currentUser/:user', async (req, res) => {
             res.status(200).json([]);
         }
     } catch (err) {
-        console.error('❌ Error getting private history:', err);
+        console.error('Error getting private history:', err);
         res.status(200).json([]);
     }
 });
@@ -229,5 +226,7 @@ app.listen(PORT, () => {
     console.log('  POST /group          - Send group message');
     console.log('  GET  /private/:user  - Get private history');
     console.log('  GET  /group/:name    - Get group history');
+    console.log('  POST /register       - Register user');
+    console.log('  DELETE /groups/:name - Delete a group');
     console.log('  GET  /health         - Health check');
 });

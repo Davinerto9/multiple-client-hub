@@ -21,7 +21,7 @@ public class Server {
     private static final Map<String, Set<String>> groups = Collections.synchronizedMap(new HashMap<>());
 
     public static void main(String[] args) {
-        System.out.println("Servidor TCP JSON iniciado en el puerto " + PORT + "...");
+        System.out.println("Servidor TCP iniciado en el puerto " + PORT + "...");
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
@@ -250,14 +250,13 @@ public class Server {
                 return;
             }
 
-            // (Opcional) exigir mínimo 2 miembros
+            // Exigir mínimo 2 miembros
             if (groupUsers.size() < 2) {
                 response.addProperty("status", "error");
                 response.addProperty("message", "A group must have at least 2 members");
                 return;
             }
 
-            // Crear el grupo
             groups.put(groupName, groupUsers);
 
             response.addProperty("status", "ok");
@@ -295,7 +294,6 @@ public class Server {
 
             MessageHistory.saveGroupMessage(sender, groupName, message);
 
-            // Enviar mensaje a todos los miembros del grupo conectados
             for (String member : groups.get(groupName)) {
                 if (activeConnections.containsKey(member) && !member.equals(sender)) {
                     JsonObject msg = new JsonObject();
@@ -439,7 +437,6 @@ public class Server {
 
             groups.remove(groupName);
 
-            // Opcional: borrar historial del grupo
             try {
                 boolean deleted = MessageHistory.deleteGroupHistory(groupName);
                 System.out.println("Historial de grupo '" + groupName + "' borrado: " + deleted);
