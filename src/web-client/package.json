@@ -11,9 +11,11 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "font-awesome": "^4.7.0",
     "ice": "^3.7.100",
     "react": "^19.2.0",
     "serve": "^14.2.5"

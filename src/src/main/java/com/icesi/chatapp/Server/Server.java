@@ -80,6 +80,9 @@ public class Server {
                 case "10": // Get all groups
                     handleGetAllGroups(response);
                     break;
+                case "11": // Delete group
+                    handleDeleteGroup(data, response);
+                    break;
                 default:
                     response.addProperty("status", "error");
                     response.addProperty("message", "Unknown action: " + action);
@@ -99,20 +102,45 @@ public class Server {
         }
     }
 
+    // Ayudante para encontrar la sessionId actual de un usuario
+    private static String findSessionIdByUsername(String username) {
+        synchronized (userSessions) {
+            for (Map.Entry<String, String> e : userSessions.entrySet()) {
+                if (username.equals(e.getValue())) {
+                    return e.getKey(); // sessionId
+                }
+            }
+        }
+        return null;
+    }
+
     private static void handleRegisterUser(JsonObject data, JsonObject response) {
         try {
-            String username = data.get("username").getAsString();
-            String sessionId = data.get("sessionId").getAsString();
+            String username = data.get("username").getAsString().trim();
+            String sessionId = data.get("sessionId").getAsString().trim();
 
-            // Registrar usuario en el sistema
-            if (!connectedUsers.contains(username)) {
-                connectedUsers.add(username);
+            if (username.isEmpty() || sessionId.isEmpty()) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Username and sessionId are required");
+                return;
             }
+
+            // ¿Ya hay una sesión asociada a este username?
+            String existingSession = findSessionIdByUsername(username);
+
+            // Si existe y es diferente a la que llega → nombre en uso
+            if (existingSession != null && !existingSession.equals(sessionId)) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Username already in use");
+                return;
+            }
+
+            // Registrar/actualizar la sesión
             userSessions.put(sessionId, username);
+            connectedUsers.add(username);
 
             response.addProperty("status", "ok");
             response.addProperty("message", "User registered: " + username);
-
             System.out.println("Usuario registrado: " + username + " (session: " + sessionId + ")");
 
         } catch (Exception e) {
@@ -127,36 +155,31 @@ public class Server {
             String message = data.get("message").getAsString();
             String sessionId = data.has("sessionId") ? data.get("sessionId").getAsString() : null;
 
-            // Obtener remitente real desde sessionId
+            // Obtener remitente real desde sessionId o 'sender'
             String sender = (sessionId != null && userSessions.containsKey(sessionId))
                     ? userSessions.get(sessionId)
-                    : data.has("sender") ? data.get("sender").getAsString() : "unknown";
+                    : (data.has("sender") ? data.get("sender").getAsString() : "unknown");
 
-            if (!connectedUsers.contains(recipient)) {
-                response.addProperty("status", "error");
-                response.addProperty("message", "User not found: " + recipient);
-                return;
-            }
+            boolean recipientOnline = connectedUsers.contains(recipient);
 
-            // Guardar historial
+            // 1) Guardar SIEMPRE el historial (una sola vez)
             MessageHistory.savePrivateMessage(sender, recipient, message);
 
-            // Crear respuesta común
-            JsonObject msg = new JsonObject();
-            msg.addProperty("status", "ok");
-            msg.addProperty("type", "privateMessage");
-            msg.addProperty("sender", sender);
-            msg.addProperty("recipient", recipient);
-            msg.addProperty("message", message);
-
-            // Enviar al destinatario si está conectado
-            if (activeConnections.containsKey(recipient)) {
-                activeConnections.get(recipient).println(msg.toString());
+            // 2) Push en vivo SOLO una vez si el destinatario está online
+            if (recipientOnline && activeConnections.containsKey(recipient)) {
+                JsonObject push = new JsonObject();
+                push.addProperty("type", "privateMessage");
+                push.addProperty("sender", sender);
+                push.addProperty("recipient", recipient);
+                push.addProperty("message", message);
+                activeConnections.get(recipient).println(push.toString());
             }
 
-            // Enviar confirmación al remitente
+            // 3) ÚNICA respuesta al remitente
             response.addProperty("status", "ok");
-            response.addProperty("message", "Private message sent");
+            response.addProperty("message", recipientOnline
+                    ? "Private message sent"
+                    : "Private message stored (recipient offline)");
             response.addProperty("sender", sender);
 
             System.out.println("Mensaje privado: " + sender + " -> " + recipient + ": " + message);
@@ -170,41 +193,67 @@ public class Server {
 
     private static void handleCreateGroup(JsonObject data, JsonObject response) {
         try {
-            String groupName = data.get("groupName").getAsString();
-            String usersStr = data.get("users").getAsString();
+            String rawGroupName = data.get("groupName").getAsString();
+            String rawUsersStr = data.get("users").getAsString();
 
-            // Parsear usuarios - remover espacios extras
-            String[] userArray = usersStr.split(",");
-            Set<String> groupUsers = new HashSet<>();
+            String groupName = (rawGroupName == null) ? "" : rawGroupName.trim();
+            if (groupName.isEmpty()) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Group name is required");
+                return;
+            }
+
+            // Evita sobreescribir un grupo existente
+            if (groups.containsKey(groupName)) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Group already exists: " + groupName);
+                return;
+            }
+
+            // Parseo + dedupe de usuarios solicitados
+            Set<String> groupUsers = new LinkedHashSet<>();
             List<String> invalidUsers = new ArrayList<>();
 
-            for (String user : userArray) {
-                String trimmedUser = user.trim();
-                if (!trimmedUser.isEmpty()) {
-                    if (connectedUsers.contains(trimmedUser)) {
-                        groupUsers.add(trimmedUser);
-                    } else {
-                        invalidUsers.add(trimmedUser);
-                    }
+            for (String u : rawUsersStr.split(",")) {
+                String user = u.trim();
+                if (user.isEmpty())
+                    continue;
+
+                if (connectedUsers.contains(user)) {
+                    groupUsers.add(user);
+                } else {
+                    invalidUsers.add(user);
                 }
             }
 
-            // Si no hay usuarios válidos, retornar error
+            // Política ESTRICTA: si hay al menos un inválido, NO se crea el grupo
+            if (!invalidUsers.isEmpty()) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Some users do not exist or are not connected");
+
+                JsonArray invalid = new JsonArray();
+                for (String user : invalidUsers)
+                    invalid.add(user);
+                response.add("invalidUsers", invalid);
+
+                JsonArray availableUsers = new JsonArray();
+                for (String user : connectedUsers)
+                    availableUsers.add(user);
+                response.add("availableUsers", availableUsers);
+                return;
+            }
+
+            // Asegurar que haya miembros válidos
             if (groupUsers.isEmpty()) {
                 response.addProperty("status", "error");
                 response.addProperty("message", "No valid users found");
+                return;
+            }
 
-                JsonArray availableUsers = new JsonArray();
-                for (String user : connectedUsers) {
-                    availableUsers.add(user);
-                }
-                response.add("availableUsers", availableUsers);
-
-                JsonArray invalid = new JsonArray();
-                for (String user : invalidUsers) {
-                    invalid.add(user);
-                }
-                response.add("invalidUsers", invalid);
+            // (Opcional) exigir mínimo 2 miembros
+            if (groupUsers.size() < 2) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "A group must have at least 2 members");
                 return;
             }
 
@@ -215,18 +264,9 @@ public class Server {
             response.addProperty("message", "Group '" + groupName + "' created with " + groupUsers.size() + " members");
 
             JsonArray members = new JsonArray();
-            for (String user : groupUsers) {
+            for (String user : groupUsers)
                 members.add(user);
-            }
             response.add("members", members);
-
-            if (!invalidUsers.isEmpty()) {
-                JsonArray invalid = new JsonArray();
-                for (String user : invalidUsers) {
-                    invalid.add(user);
-                }
-                response.add("invalidUsers", invalid);
-            }
 
             System.out.println("Grupo creado: " + groupName + " con usuarios: " + groupUsers);
 
@@ -377,6 +417,43 @@ public class Server {
         } catch (Exception e) {
             response.addProperty("status", "error");
             response.addProperty("message", "Error getting groups: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleDeleteGroup(JsonObject data, JsonObject response) {
+        try {
+            String groupName = data.get("groupName").getAsString();
+
+            if (groupName == null || groupName.trim().isEmpty()) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Group name is required");
+                return;
+            }
+
+            if (!groups.containsKey(groupName)) {
+                response.addProperty("status", "error");
+                response.addProperty("message", "Group not found: " + groupName);
+                return;
+            }
+
+            groups.remove(groupName);
+
+            // Opcional: borrar historial del grupo
+            try {
+                boolean deleted = MessageHistory.deleteGroupHistory(groupName);
+                System.out.println("Historial de grupo '" + groupName + "' borrado: " + deleted);
+            } catch (Exception ignore) {
+            }
+
+            response.addProperty("status", "ok");
+            response.addProperty("message", "Group '" + groupName + "' deleted");
+
+            System.out.println("Grupo eliminado: " + groupName);
+
+        } catch (Exception e) {
+            response.addProperty("status", "error");
+            response.addProperty("message", "Error deleting group: " + e.getMessage());
             e.printStackTrace();
         }
     }

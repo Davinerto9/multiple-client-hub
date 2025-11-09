@@ -131,7 +131,6 @@ app.post('/group', async (req, res) => {
     } catch (err) {
         console.error('Error sending group message:', err);
         res.status(500).json({ error: 'Error sending group message: ' + err.message });
-        D
     }
 });
 
@@ -189,6 +188,27 @@ app.get('/private/:currentUser/:user', async (req, res) => {
         console.error('❌ Error getting private history:', err);
         res.status(200).json([]);
     }
+});
+
+app.delete('/groups/:name', async (req, res) => {
+  try {
+    const groupName = req.params.name;
+    console.log('DELETE /groups/:name', groupName);
+
+    if (!groupName) {
+      return res.status(400).json({ status: 'error', message: 'Group name is required' });
+    }
+
+    const response = await delegate.deleteGroup(groupName); // acción "4"
+    if (response.status === 'ok') {
+      return res.status(200).json(response);
+    } else {
+      return res.status(400).json({ status: 'error', message: response.message || 'Error deleting group' });
+    }
+  } catch (err) {
+    console.error('Error deleting group:', err);
+    return res.status(500).json({ status: 'error', message: 'Error deleting group: ' + err.message });
+  }
 });
 
 // Health check endpoint

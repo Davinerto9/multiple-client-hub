@@ -137,21 +137,25 @@ body {
     border-bottom: 1px solid #0f3460;
 }
 
-.create-group-btn {
-    width: 100%;
-    padding: 10px;
-    background: #007aff;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.3s;
+.delete-group-section {
+    padding: 15px;
+    border-top: 1px solid #0f3460;
 }
+.create-group-btn, .delete-group-btn {
+    width: 100%;                /* Ensure both buttons take up full width */
+    padding: 12px;              /* Same padding for both */
+    font-size: 16px;            /* Same font size for both */
+    display: flex;              /* Flexbox to align the content inside */
+    align-items: center;        /* Vertically center the icon and text */
+    justify-content: center;    /* Horizontally center the content */
+    gap: 8px;                   /* Space between the icon and text */
+    border-radius: 8px;         /* Same border radius for both buttons */
+    cursor: pointer;           /* Show pointer cursor when hovered */
+    border: none;               /* Remove any default borders */
+    transition: all 0.3s;       /* Smooth transition for hover effects */
+}
+
+
 
 .create-group-btn:hover {
     background: #0051d5;
@@ -542,6 +546,22 @@ body {
 }
 
 
+/* Botón de Crear Grupo */
+.create-group-btn {
+    background: #007aff;
+    color: white;
+}
+
+/* Botón de Eliminar Grupo */
+.delete-group-btn {
+    background: #ff3b30;
+    color: white;
+}
+
+.delete-group-btn:hover {
+    background: #c1271f;
+}
+
 /* Icons (using Unicode) */
 .icon-user::before { content: "👤"; }
 .icon-group::before { content: "👥"; }
@@ -549,3 +569,17 @@ body {
 .icon-history::before { content: "📋"; }
 .icon-logout::before { content: "🚪"; }
 .icon-message::before { content: "💬"; }
+.icon-trash::before { content: "🗑️"; }
+
+/* Example responsive icon size */
+@media (max-width: 768px) {
+    .icon-user, .icon-group, .icon-send, .icon-history, .icon-logout, .icon-message {
+        font-size: 18px; /* Smaller icons on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .icon-user, .icon-group, .icon-send, .icon-history, .icon-logout, .icon-message {
+        font-size: 16px; /* Even smaller on very small screens */
+    }
+}

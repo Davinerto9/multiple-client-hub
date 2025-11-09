@@ -97,17 +97,17 @@ class DelegateService {
         });
     }
 
-    async sendPrivateMessage(recipient, message) {
+    async sendPrivateMessage(sender, recipient, message) {
         return this.sendRequest('1', {
-            sender,
+            sender: sender || this.currentUser || 'unknown',
             recipient,
             message
         });
     }
 
-    async sendGroupMessage(groupName, message) {
+    async sendGroupMessage(sender, groupName, message) {
         return this.sendRequest('3', {
-            sender,
+            sender: sender || this.currentUser || 'unknown',
             groupName,
             message
         });
@@ -141,6 +141,10 @@ class DelegateService {
 
     async getAllGroups() {
         return this.sendRequest('10', {});
+    }
+
+    async deleteGroup(groupName) {
+        return this.sendRequest('11', { groupName });
     }
 }
 

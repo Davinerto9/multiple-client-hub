@@ -140,12 +140,21 @@ export default function ChatApp(username) {
 
         sidebar.appendChild(sidebarHeader);
         sidebar.appendChild(createGroupSection);
+
+        const deleteGroupSection = document.createElement('div');
+        deleteGroupSection.classList.add('delete-group-section');
+
+        const deleteGroupBtn = document.createElement('button');
+        deleteGroupBtn.classList.add('delete-group-btn');
+        deleteGroupBtn.innerHTML = '<span class="icon-trash"></span> Delete Group';
+        deleteGroupBtn.addEventListener('click', showDeleteGroupModal);
+
+        deleteGroupSection.appendChild(deleteGroupBtn);
+        sidebar.appendChild(deleteGroupSection);
         sidebar.appendChild(chatListSection);
 
         return sidebar;
     }
-
-
 
     // Main Chat Area
     const mainChat = document.createElement('div');
@@ -487,8 +496,6 @@ export default function ChatApp(username) {
     }
 
     // ============ ACTION HANDLERS ============
-    let messagePollingInterval = null; // para polling cuando hay un chat seleccionado
-
     async function sendMessage() {
         const input = document.getElementById('messageInput');
         const errorDiv = document.getElementById('errorMessage');
@@ -740,5 +747,110 @@ export default function ChatApp(username) {
         setTimeout(() => groupNameInput.focus(), 100);
     }
 
-    return container;
+    function showDeleteGroupModal() {
+        if (!groups || groups.length === 0) {
+            alert('There are no groups to delete.');
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.classList.add('modal-overlay', 'show');
+
+        const modalContent = document.createElement('div');
+        modalContent.classList.add('modal-content');
+
+        const title = document.createElement('h3');
+        title.textContent = 'Delete Group';
+
+        const selectLabel = document.createElement('label');
+        selectLabel.textContent = 'Select a group:';
+
+        const groupSelect = document.createElement('select');
+        groupSelect.classList.add('modal-input');
+
+        // llena el select con los grupos actuales
+        groups.forEach(g => {
+            const name = typeof g === 'string' ? g : g.name;
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            groupSelect.appendChild(opt);
+        });
+
+        const errorMsg = document.createElement('div');
+        errorMsg.classList.add('error-message', 'hidden');
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('modal-buttons');
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.classList.add('modal-btn', 'modal-btn-cancel');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('modal-btn', 'modal-btn-delete');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', async () => {
+            const groupName = groupSelect.value;
+            if (!groupName) {
+                errorMsg.textContent = 'Select a group';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                deleteBtn.disabled = true;
+                deleteBtn.textContent = 'Deleting...';
+
+                const resp = await ChatService.deleteGroup(groupName);
+                if (resp.status !== 'ok') {
+                    throw new Error(resp.message || 'Error deleting group');
+                }
+
+                // quitar del arreglo local
+                groups = groups.filter(g => (typeof g === 'string' ? g : g.name) !== groupName);
+
+                // si el seleccionado era el mismo grupo, limpiar la vista
+                if (selectedChat === groupName && chatType === 'group') {
+                    selectedChat = null;
+                    chatType = null;
+                    messages = [];
+                    renderMainChat();
+                }
+
+                renderGroupsList();
+                document.body.removeChild(modal);
+                alert("Group '${groupName}' deleted");
+
+            } catch (err) {
+                errorMsg.textContent = err.message;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = 'Delete';
+            }
+        });
+
+        buttonContainer.appendChild(cancelBtn);
+        buttonContainer.appendChild(deleteBtn);
+
+        modalContent.appendChild(title);
+        modalContent.appendChild(selectLabel);
+        modalContent.appendChild(groupSelect);
+        modalContent.appendChild(errorMsg);
+        modalContent.appendChild(buttonContainer);
+
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // cerrar al hacer click fuera
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) document.body.removeChild(modal);
+        });
+    }
+
+        return container;
 }

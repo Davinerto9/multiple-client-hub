@@ -1,14 +1,28 @@
 const API_URL = 'http://localhost:3000';
 
 export const ChatService = {
-    registerUser: async (username) => {
-        const sessionId = sessionStorage.getItem('sessionId') || Date.now().toString();
-        sessionStorage.setItem('sessionId', sessionId);
-        
-        const res = await fetch(`${API_URL}/register`, {
+    registerUser: async (username, sessionId) => {
+        // usa otra variable para evitar redeclaración
+        let sid = sessionId ?? sessionStorage.getItem('sessionId');
+        if (!sid) {
+            sid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : `${Date.now()} -${Math.random().toString(16).slice(2)}`;
+            sessionStorage.setItem('sessionId', sid);
+        }
+
+        const res = await fetch(`${API_URL}/register`, {   // <-- backticks
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, sessionId })
+            body: JSON.stringify({ username, sessionId: sid })
+        });
+        return await res.json();
+    },
+
+    deleteGroup: async (groupName) => {
+        const res = await fetch(`${API_URL}/groups/${encodeURIComponent(groupName)}`,{
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
         });
         return await res.json();
     },
@@ -41,12 +55,12 @@ export const ChatService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ groupName, users })
         });
-        
+
         if (!res.ok) {
             const error = await res.json();
             throw new Error(error.error || 'Failed to create group');
         }
-        
+
         return await res.json();
     },
 
