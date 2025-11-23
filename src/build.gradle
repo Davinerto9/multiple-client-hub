@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.zeroc.gradle.ice-builder.slice' version '1.5.0'
 }
 
 group 'com.icesi'
@@ -7,19 +8,37 @@ version '1.0.0'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://repo.zeroc.com/nexus/content/repositories/releases'
+    }
 }
 
 dependencies {
+    implementation 'com.zeroc:ice:3.7.10'
     implementation 'com.google.code.gson:gson:2.10.1'
-    // PostgreSQL JDBC driver
     implementation 'org.postgresql:postgresql:42.6.0'
-    // HikariCP connection pool (opcional pero recomendado)
     implementation 'com.zaxxer:HikariCP:5.0.1'
-
     implementation 'org.slf4j:slf4j-simple:2.0.9'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+// ✅ CONFIGURACIÓN SLICE CON RUTAS RELATIVAS
+slice {
+    java {
+        files = [file('../chatapp.ice')]  // ← Sube un nivel para encontrar chatapp.ice
+        outputDir = file('generated')     // ← Ahora en src/generated
+    }
+}
+
+// ✅ SourceSets ajustados
+sourceSets {
+    main {
+        java {
+            srcDirs = ['main/java', 'generated']  // ← Rutas relativas a src/
+        }
+    }
 }
 
 test {
@@ -28,62 +47,48 @@ test {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
-// TAREAS PARA EJECUTAR EL SERVIDOR Y EL CLIENTE
+// TAREAS CON RUTAS AJUSTADAS
 task runServer(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     mainClass = 'com.icesi.chatapp.Server.Server'
-    workingDir file('.')
+    workingDir file('..')  // ← Ejecutar desde la raíz
+    dependsOn compileJava
 }
 
 task runClient(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     mainClass = 'com.icesi.chatapp.Client.Client'
-    workingDir file('.')
+    workingDir file('..')  // ← Ejecutar desde la raíz
+    dependsOn compileJava
 }
 
-// ===============================================
-// ** JAR del Servidor (por defecto con 'gradlew build') **
-// ===============================================
+// JARs con configuración ajustada
 jar {
     archiveBaseName = 'chat-server'
     manifest {
         attributes 'Main-Class': 'com.icesi.chatapp.Server.Server'
     }
     from {
-        sourceSets.main.output
-        sourceSets.main.runtimeClasspath
-                .filter { it.exists() }
-                .collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// ===============================================
-// ** JAR del Cliente **
-// ===============================================
 task clientJar(type: Jar) {
     archiveBaseName = 'chat-client'
     manifest {
-        attributes(
-                'Main-Class': 'com.icesi.chatapp.Client.Client'
-        )
+        attributes 'Main-Class': 'com.icesi.chatapp.Client.Client'
     }
     from {
-        sourceSets.main.output
-        sourceSets.main.runtimeClasspath
-                .filter { it.exists() }
-                .collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// ===============================================
-// ** Tarea para generar ambos JARs **
-// ===============================================
 task buildJars(dependsOn: [jar, clientJar]) {
     group = 'build'
     description = 'Builds both server and client executable JARs.'
