@@ -1,9 +1,11 @@
 plugins {
     id 'java'
+    id 'com.zeroc.gradle.ice-builder.slice' version '1.5.0' apply false
 }
 
 group 'com.icesi'
 version '1.0.0'
+apply plugin: 'com.zeroc.gradle.ice-builder.slice'
 
 repositories {
     mavenCentral()
@@ -11,11 +13,9 @@ repositories {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
-    // PostgreSQL JDBC driver
     implementation 'org.postgresql:postgresql:42.6.0'
-    // HikariCP connection pool (opcional pero recomendado)
     implementation 'com.zaxxer:HikariCP:5.0.1'
-
+    implementation 'com.zeroc:ice:3.7.9'
     implementation 'org.slf4j:slf4j-simple:2.0.9'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
@@ -32,7 +32,12 @@ java {
     }
 }
 
-// TAREAS PARA EJECUTAR EL SERVIDOR Y EL CLIENTE
+slice {
+    srcDir = file('.')                 // <-- AQUÍ LEE TU .ICE
+    outputDir = file('src/main/java')  // <-- GENERA AQUÍ EL CÓDIGO
+    includes = ['chatapp.ice']         // <-- TU ARCHIVO ICE
+}
+
 task runServer(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     mainClass = 'com.icesi.chatapp.Server.Server'
@@ -45,9 +50,6 @@ task runClient(type: JavaExec) {
     workingDir file('.')
 }
 
-// ===============================================
-// ** JAR del Servidor (por defecto con 'gradlew build') **
-// ===============================================
 jar {
     archiveBaseName = 'chat-server'
     manifest {
@@ -62,9 +64,6 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// ===============================================
-// ** JAR del Cliente **
-// ===============================================
 task clientJar(type: Jar) {
     archiveBaseName = 'chat-client'
     manifest {
@@ -81,9 +80,6 @@ task clientJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-// ===============================================
-// ** Tarea para generar ambos JARs **
-// ===============================================
 task buildJars(dependsOn: [jar, clientJar]) {
     group = 'build'
     description = 'Builds both server and client executable JARs.'

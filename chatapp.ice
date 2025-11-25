@@ -1,54 +1,73 @@
 module ChatApp {
-
+    sequence<byte> AudioData;
+    sequence<string> StringSeq;
+    
     struct TextMessage {
         string sender;
-        string receiver;
         string content;
-        long timestamp;
-        bool isGroup;
+        string timestamp;
     };
-
-    struct AudioChunk {
+    
+    sequence<TextMessage> MessageSeq;
+    
+    struct AudioMetadata {
         string sender;
-        string receiver;
-        bool isGroup;
-        int index;
-        bool last;
-        byte[] data;
-        long timestamp;
+        string timestamp;
+        long size;
     };
-
+    
+    struct CallInfo {
+        string callId;
+        string caller;
+        string callee;
+        bool isActive;
+        string timestamp;
+    };
+    
     struct GroupInfo {
         string name;
-        string[] members;
+        StringSeq members;
     };
-
-    interface ClientCallback {
-        void onTextMessage(TextMessage msg);
-        void onAudioChunk(AudioChunk chunk);
-        void onIncomingCall(string fromUser);
-        void onCallAccepted(string fromUser);
-        void onCallRejected(string fromUser);
-        void onGroupCreated(GroupInfo group);
+    
+    sequence<GroupInfo> GroupSeq;
+    
+    interface ChatObserver {
+        void onPrivateMessage(string sender, string message, string timestamp);
+        void onGroupMessage(string sender, string groupName, string message, string timestamp);
+        void onVoiceNoteReceived(string sender, AudioMetadata metadata, AudioData data);
+        void onGroupVoiceNote(string sender, string groupName, AudioMetadata metadata, AudioData data);
+        void onIncomingCall(CallInfo callInfo);
+        void onCallAnswered(string callId, bool accepted);
+        void onCallAudioChunk(string callId, string sender, AudioData chunk);
+        void onCallEnded(string callId);
+        void onUserConnected(string username);
+        void onUserDisconnected(string username);
+        void onGroupCreated(string groupName, StringSeq members);
+        void onGroupDeleted(string groupName);
     };
-
+    
+    interface Subject {
+        void attachObserver(string username, ChatObserver* observer);
+        void deAttachObserver(string username);
+    };
+        
     interface ChatService {
-        bool login(string username, ClientCallback* cb);
-        void sendPrivateMessage(string sender, string receiver, string content);
-        bool createGroup(string creator, string groupName, string[] members);
-        void sendGroupMessage(string sender, string groupName, string content);
-        TextMessage[] getPrivateHistory(string user1, string user2);
-        TextMessage[] getGroupHistory(string groupName);
-    };
-
-    interface AudioService {
-        void sendPrivateAudioChunk(AudioChunk chunk);
-        void sendGroupAudioChunk(AudioChunk chunk);
-    };
-
-    interface CallService {
-        void requestCall(string caller, string callee);
-        void acceptCall(string caller, string callee);
-        void rejectCall(string caller, string callee);
+        bool sendPrivateMessage(string sender, string recipient, string message);
+        bool sendGroupMessage(string sender, string groupName, string message);
+        bool createGroup(string groupName, StringSeq members);
+        bool deleteGroup(string groupName);
+        bool addMemberToGroup(string groupName, string username);
+        bool removeMemberFromGroup(string groupName, string username);
+        bool sendVoiceNote(string sender, string recipient, AudioMetadata metadata, AudioData data);
+        bool sendGroupVoiceNote(string sender, string groupName, AudioData data);
+        AudioData getAudioFromHistory(string fileName);
+        string initiateCall(string caller, string callee);
+        bool answerCall(string callId, bool accept);
+        void streamCallAudio(string callId, string sender, AudioData chunk);
+        bool endCall(string callId);
+        StringSeq getConnectedUsers();
+        GroupSeq getAllGroups();
+        MessageSeq getPrivateHistory(string user1, string user2);
+        MessageSeq getGroupHistory(string groupName);
     };
 };
