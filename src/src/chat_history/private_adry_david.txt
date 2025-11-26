@@ -1,0 +1,85 @@
+[2025-11-24 12:29:25] david -> adry: Hola
+[2025-11-24 12:29:35] adry -> david: [AUDIO:private_adry_david_2025-11-24_12-29-35.webm]
+[2025-11-24 12:29:45] david -> adry: pepito perez
+[2025-11-24 12:29:51] adry -> david: hola
+[2025-11-24 12:30:40] adry -> david: [CALL START] 2025-11-24 12:30:40
+[2025-11-24 12:30:50] adry -> david: [CALL END] 2025-11-24 12:30:50
+[2025-11-24 13:06:30] david -> adry: [AUDIO:private_david_adry_2025-11-24_13-06-30.webm]
+[2025-11-24 17:08:11] adry -> david: [CALL START] 2025-11-24 17:08:11
+[2025-11-24 17:08:32] adry -> david: [CALL END] 2025-11-24 17:08:32
+[2025-11-24 17:13:26] adry -> david: lets work around this crap
+[2025-11-24 17:14:02] david -> adry: ok
+[2025-11-24 17:33:03] david -> adry: [CALL START] 2025-11-24 17:33:03
+[2025-11-24 17:33:43] david -> adry: [CALL END] 2025-11-24 17:33:43
+[2025-11-24 17:38:06] david -> adry: okay
+[2025-11-24 17:57:46] adry -> david: [CALL START] 2025-11-24 17:57:46
+[2025-11-24 17:57:57] adry -> david: [CALL END] 2025-11-24 17:57:57
+[2025-11-24 17:58:07] adry -> david: [CALL START] 2025-11-24 17:58:07
+[2025-11-24 17:58:32] adry -> david: [CALL END] 2025-11-24 17:58:32
+[2025-11-24 17:59:39] adry -> david: [CALL START] 2025-11-24 17:59:39
+[2025-11-24 18:00:12] adry -> david: [CALL END] 2025-11-24 18:00:12
+[2025-11-24 18:01:49] david -> adry: [AUDIO:private_david_adry_2025-11-24_18-01-49.webm]
+[2025-11-24 18:09:38] adry -> david: [CALL START] 2025-11-24 18:09:38
+[2025-11-24 18:09:48] adry -> david: [CALL END] 2025-11-24 18:09:48
+[2025-11-24 18:14:50] david -> adry: [CALL START] 2025-11-24 18:14:50
+[2025-11-24 18:15:04] david -> adry: [CALL END] 2025-11-24 18:15:04
+[2025-11-24 18:15:55] david -> adry: [CALL START] 2025-11-24 18:15:55
+[2025-11-24 18:17:08] david -> adry: [CALL END] 2025-11-24 18:17:08
+[2025-11-24 18:25:12] david -> adry: [CALL START] 2025-11-24 18:25:12
+[2025-11-24 18:26:52] david -> adry: [CALL END] 2025-11-24 18:26:52
+[2025-11-24 18:27:14] adry -> david: [CALL START] 2025-11-24 18:27:14
+[2025-11-24 18:30:57] adry -> david: [CALL END] 2025-11-24 18:30:57
+[2025-11-24 18:31:46] david -> adry: [CALL START] 2025-11-24 18:31:46
+[2025-11-24 18:32:06] david -> adry: [CALL END] 2025-11-24 18:32:06
+[2025-11-24 18:36:00] david -> adry: [CALL START] 2025-11-24 18:36:00
+[2025-11-24 18:36:24] david -> adry: [CALL END] 2025-11-24 18:36:24
+[2025-11-24 18:37:27] adry -> david: [CALL START] 2025-11-24 18:37:27
+[2025-11-24 18:37:46] adry -> david: [CALL END] 2025-11-24 18:37:46
+[2025-11-24 18:39:16] david -> adry: [CALL START] 2025-11-24 18:39:16
+[2025-11-24 18:41:40] david -> adry: [CALL END] 2025-11-24 18:41:40
+[2025-11-24 18:42:26] david -> adry: [CALL START] 2025-11-24 18:42:26
+[2025-11-24 18:42:41] david -> adry: [CALL END] 2025-11-24 18:42:41
+[2025-11-24 18:51:22] david -> adry: [CALL START] 2025-11-24 18:51:22
+[2025-11-24 18:51:49] david -> adry: [CALL END] 2025-11-24 18:51:49
+[2025-11-24 18:52:17] david -> adry: [CALL START] 2025-11-24 18:52:17
+[2025-11-24 18:52:44] david -> adry: [CALL END] 2025-11-24 18:52:44
+[2025-11-24 19:43:26] adry -> david: [CALL START] 2025-11-24 19:43:26
+[2025-11-24 19:44:22] adry -> david: [CALL END] 2025-11-24 19:44:22
+[2025-11-24 23:36:09] david -> adry: bueno
+[2025-11-24 23:36:26] adry -> david: [CALL START] 2025-11-24 23:36:26
+[2025-11-24 23:36:34] adry -> david: [CALL END] 2025-11-24 23:36:34
+[2025-11-25 01:50:45] david -> adry: [CALL START] 2025-11-25 01:50:45
+[2025-11-25 01:51:02] david -> adry: [CALL END] 2025-11-25 01:51:02
+[2025-11-25 02:36:05] david -> adry: [CALL START] 2025-11-25 02:36:05
+[2025-11-25 02:37:06] david -> adry: [AUDIO:private_david_adry_2025-11-25_02-37-06.webm]
+[2025-11-25 02:37:12] david -> adry: [CALL START] 2025-11-25 02:37:12
+[2025-11-25 02:37:22] david -> adry: [CALL END] 2025-11-25 02:37:22
+[2025-11-25 02:39:19] david -> adry: gg
+[2025-11-25 02:39:31] adry -> david: ok
+[2025-11-25 02:39:38] david -> adry: sure
+[2025-11-25 03:57:16] david -> adry: [CALL START] 2025-11-25 03:57:16
+[2025-11-25 04:12:06] adry -> david: well its GG
+[2025-11-25 04:12:14] david -> adry: COOL
+[2025-11-25 04:13:34] david -> adry: fine
+[2025-11-25 04:17:16] david -> adry: xd
+[2025-11-25 04:17:32] david -> adry: well i think it works fine for NOW
+[2025-11-25 04:17:38] adry -> david: [CALL START] 2025-11-25 04:17:38
+[2025-11-25 04:17:47] adry -> david: [CALL END] 2025-11-25 04:17:47
+[2025-11-25 04:30:23] adry -> david: [CALL START] 2025-11-25 04:30:23
+[2025-11-25 04:30:47] adry -> david: [CALL END] 2025-11-25 04:30:47
+[2025-11-25 13:52:06] adry -> david: hi
+[2025-11-25 15:04:57] adry -> david: [AUDIO:private_adry_david_2025-11-25_15-04-57.webm]
+[2025-11-25 15:05:13] david -> adry: wow
+[2025-11-25 15:05:21] adry -> david: cool
+[2025-11-25 15:05:30] adry -> david: test
+[2025-11-25 15:13:34] david -> adry: [AUDIO:private_david_adry_2025-11-25_15-13-34.webm]
+[2025-11-25 15:14:36] adry -> david: [AUDIO:private_adry_david_2025-11-25_15-14-36.webm]
+[2025-11-25 15:19:53] adry -> david: [AUDIO:private_adry_david_2025-11-25_15-19-53.webm]
+[2025-11-25 15:20:02] adry -> david: [AUDIO:private_adry_david_2025-11-25_15-20-02.webm]
+[2025-11-25 18:52:33] adry -> david: [REPLY:david|2025-11-25 04:17:32] PI is dogshit for sure man
+[2025-11-25 22:19:22] adry -> david: hola
+[2025-11-25 22:20:11] david -> adry: Hola niño
+[2025-11-25 22:20:14] adry -> david: Hola
+[2025-11-25 22:20:19] adry -> david: mama 6
+[2025-11-25 22:21:21] david -> adry: [CALL START] 2025-11-25 22:21:21
+[2025-11-25 22:22:13] david -> adry: [CALL END] 2025-11-25 22:22:13

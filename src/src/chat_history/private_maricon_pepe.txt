@@ -1,0 +1,4 @@
+[2025-11-22 21:29:34] maricon -> pepe: pepe
+[2025-11-22 21:29:38] pepe -> maricon: pepe
+[2025-11-22 21:35:02] pepe -> maricon: ccc
+[2025-11-22 21:35:08] maricon -> pepe: cccc

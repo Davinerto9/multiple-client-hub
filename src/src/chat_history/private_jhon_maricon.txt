@@ -1,0 +1,2 @@
+[2025-11-23 15:32:28] maricon -> jhon: hola
+[2025-11-23 15:32:40] jhon -> maricon: hola

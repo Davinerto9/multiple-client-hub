@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "dev": "webpack serve --open",
+    "watch": "webpack --watch"
   },
   "keywords": [],
   "author": "",
@@ -13,11 +16,20 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
     "axios": "^1.13.2",
+    "buffer": "^6.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "font-awesome": "^4.7.0",
     "ice": "^3.7.100",
+    "process": "^0.11.10",
     "react": "^19.2.0",
-    "serve": "^14.2.5"
+    "serve": "^14.2.5",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5",
+    "webpack": "^5.103.0"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^13.0.1",
+    "webpack-cli": "^6.0.1"
   }
 }

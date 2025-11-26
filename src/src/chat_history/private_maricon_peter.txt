@@ -1,0 +1,21 @@
+[2025-11-23 17:20:52] maricon -> peter: hola
+[2025-11-23 17:25:21] peter -> maricon: hola
+[2025-11-23 17:29:42] peter -> maricon: hola desde user1
+[2025-11-23 17:33:31] peter -> maricon: peter hola
+[2025-11-23 17:42:04] peter -> maricon: test
+[2025-11-23 17:42:23] peter -> maricon: test
+[2025-11-23 17:48:06] peter -> maricon: hl
+[2025-11-23 18:07:32] maricon -> peter: hola pete
+[2025-11-23 18:07:51] peter -> maricon: hola
+[2025-11-23 18:08:35] maricon -> peter: hola
+[2025-11-23 18:08:41] peter -> maricon: hola
+[2025-11-23 18:08:58] maricon -> peter: x
+[2025-11-23 18:09:51] maricon -> peter: jhonson 3
+[2025-11-23 19:05:10] maricon -> peter: hola
+[2025-11-23 19:30:55] peter -> maricon: callbacks 0
+[2025-11-24 10:56:43] peter -> maricon: hola
+[2025-11-24 10:56:50] maricon -> peter: jojo
+[2025-11-24 10:58:10] peter -> maricon: p
+[2025-11-24 11:02:23] peter -> maricon: jhonson 3
+[2025-11-24 11:02:28] maricon -> peter: jajaja
+[2025-11-24 11:09:22] peter -> maricon: pepito perez

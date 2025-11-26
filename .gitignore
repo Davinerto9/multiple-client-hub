@@ -27,4 +27,4 @@ replay_pid*
 .vscode
 
 
-node_modules/
+**/node_modules/

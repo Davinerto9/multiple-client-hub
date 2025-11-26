@@ -1,0 +1,4 @@
+[2025-11-23 18:33:30] f -> peter: hola peter
+[2025-11-23 18:33:35] peter -> f: hola
+[2025-11-23 18:33:55] f -> peter: NO FUNCIONAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+[2025-11-23 18:36:01] peter -> f: maricon

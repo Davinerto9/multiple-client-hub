@@ -1,6 +1,15 @@
 export const Router = (paths) => {
 
-    const route = window.location.pathname;
+    let route = window.location.pathname;
+    
+    if (route.startsWith("/chat")) {
+        route = route.substring("/chat".length) || "/";
+    }
+
+    // Normalizar barra final
+    if (route.length > 1 && route.endsWith("/")) {
+        route = route.slice(0, -1);
+    }
 
     const routeComponent = paths[route] || (() => {
         const notFound = document.createElement("p");
