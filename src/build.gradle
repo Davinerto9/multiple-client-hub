@@ -92,12 +92,6 @@ task buildFrontend(type: Exec) {
     commandLine 'cmd', '/c', 'npm', 'run', 'build' // en Windows
 }
 
-task runIceServer(type: JavaExec) {
-    classpath sourceSets.main.runtimeClasspath
-    mainClass = 'com.icesi.chatapp.ICEServices.ICEServer'
-}
-
-
 war {
     dependsOn buildFrontend // primero corre webpack
     archiveBaseName = 'chat-frontend' // nombre del .war
@@ -106,7 +100,7 @@ war {
     }
     webInf { // opcional: WEB-INF mínimo
         from('src/main/webapp/WEB-INF') {
-            include '**/*' // si quieres poner web.xml, etc.
+            include '**/*' // si se quiere poner web.xml, etc.
         }
     }
 }

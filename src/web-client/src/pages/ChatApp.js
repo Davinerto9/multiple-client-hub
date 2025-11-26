@@ -8,11 +8,11 @@ export default function ChatApp(username) {
     async function ensureIceConnection() {
         // Si no hay proxy activo, intentar crear/reconectar
         if (!window.ChatService || !window.ChatService.chatServicePrx) {
-            console.warn('⚠️ Ice no está inicializado, intentando reconectar...');
+            console.warn('Ice no está inicializado, intentando reconectar...');
 
             // 1) Verificar que las librerías están disponibles
             if (!window.Ice || !window.ChatApp) {
-                console.error('❌ Ice.js o Chat.js no están cargados');
+                console.error('Ice.js o Chat.js no están cargados');
                 sessionStorage.removeItem('username');
                 sessionStorage.removeItem('iceConnected');
 
@@ -29,36 +29,36 @@ export default function ChatApp(username) {
             const iceWasConnected = sessionStorage.getItem('iceConnected') === 'true';
 
             if (savedUsername && iceWasConnected) {
-                console.log('🔄 Reconectando Ice para usuario:', savedUsername);
+                console.log('Reconectando Ice para usuario:', savedUsername);
 
                 try {
                     const reconnected = await window.ChatService.initialize(savedUsername, {
                         onMessage: (data) => {
-                            console.log('💬 Mensaje recibido (reconexión):', data);
+                            console.log('Mensaje recibido (reconexión):', data);
                             if (window.currentChatApp && window.currentChatApp.handleIncomingMessage) {
                                 window.currentChatApp.handleIncomingMessage(data);
                             }
                         },
                         onVoiceNote: (data) => {
-                            console.log('🎤 Audio recibido (reconexión):', data);
+                            console.log('Audio recibido (reconexión):', data);
                             if (window.currentChatApp && window.currentChatApp.handleIncomingVoiceNote) {
                                 window.currentChatApp.handleIncomingVoiceNote(data);
                             }
                         },
                         onCall: (data) => {
-                            console.log('📞 Llamada (reconexión):', data);
+                            console.log('Llamada (reconexión):', data);
                             if (window.currentChatApp && window.currentChatApp.handleCallEvent) {
                                 window.currentChatApp.handleCallEvent(data);
                             }
                         },
                         onUserStatus: (data) => {
-                            console.log('👤 Estado usuario (reconexión):', data);
+                            console.log('Estado usuario (reconexión):', data);
                             if (window.currentChatApp && window.currentChatApp.handleUserStatusChange) {
                                 window.currentChatApp.handleUserStatusChange(data);
                             }
                         },
                         onGroupUpdate: (data) => {
-                            console.log('📁 Grupo actualizado (reconexión):', data);
+                            console.log('Grupo actualizado (reconexión):', data);
                             if (window.currentChatApp && window.currentChatApp.handleGroupUpdate) {
                                 window.currentChatApp.handleGroupUpdate(data);
                             }
@@ -66,16 +66,16 @@ export default function ChatApp(username) {
                     });
 
                     if (reconnected) {
-                        console.log('✅ Ice reconectado correctamente');
+                        console.log('Ice reconectado correctamente');
                         return true;
                     }
                 } catch (error) {
-                    console.error('❌ Error reconectando Ice:', error);
+                    console.error('Error reconectando Ice:', error);
                 }
             }
 
             // 2) Si llegamos aquí es que no se pudo conectar/reconectar
-            console.log('🔄 Redirigiendo a Home...');
+            console.log('Redirigiendo a Home...');
             sessionStorage.removeItem('username');
             sessionStorage.removeItem('iceConnected');
 
@@ -141,7 +141,7 @@ export default function ChatApp(username) {
     async function loadInitialData() {
         try {
             console.log('═══════════════════════════════════════════');
-            console.log('📋 Cargando datos iniciales...');
+            console.log('Cargando datos iniciales...');
 
             const ok = await ensureIceConnection();
             if (!ok) return;
@@ -150,8 +150,8 @@ export default function ChatApp(username) {
                 throw new Error('ChatService no está inicializado');
             }
 
-            console.log('✅ ChatService verificado');
-            console.log('   Usuario actual:', window.ChatService.currentUser);
+            console.log('ChatService verificado');
+            console.log('Usuario actual:', window.ChatService.currentUser);
 
             users = [];
             groups = [];
@@ -167,42 +167,42 @@ export default function ChatApp(username) {
                 } else if (usersData && typeof usersData === 'object') {
                     users = Object.values(usersData).filter(u => u && u !== username);
                 } else {
-                    console.warn('⚠️ Formato de usuarios inesperado');
+                    console.warn('Formato de usuarios inesperado');
                     users = [];
                 }
-                console.log('✅ Usuarios:', users);
+                console.log('Usuarios:', users);
             } catch (err) {
-                console.error('❌ Error cargando usuarios:', err);
+                console.error('Error cargando usuarios:', err);
                 users = [];
             }
 
             // Grupos
             try {
-                console.log('📁 Obteniendo grupos...');
+                console.log('Obteniendo grupos...');
                 const groupsData = await window.ChatService.getAllGroups();
                 console.log('   Respuesta raw:', groupsData);
 
                 if (Array.isArray(groupsData)) {
                     groups = groupsData;
                 } else {
-                    console.warn('⚠️ Formato de grupos inesperado');
+                    console.warn('Formato de grupos inesperado');
                     groups = [];
                 }
-                console.log('✅ Grupos:', groups);
+                console.log('Grupos:', groups);
             } catch (err) {
-                console.error('❌ Error cargando grupos:', err);
+                console.error('Error cargando grupos:', err);
                 groups = [];
             }
 
             renderUsersList();
             renderGroupsList();
 
-            console.log('🎉 Datos iniciales cargados');
-            console.log('   Usuarios:', users.length);
-            console.log('   Grupos:', groups.length);
+            console.log('Datos iniciales cargados');
+            console.log('Usuarios:', users.length);
+            console.log('Grupos:', groups.length);
             console.log('═══════════════════════════════════════════');
         } catch (err) {
-            console.error('❌ ERROR CRÍTICO cargando datos iniciales:', err);
+            console.error('ERROR CRÍTICO cargando datos iniciales:', err);
 
             const main = document.getElementById('mainChat');
             if (main) {

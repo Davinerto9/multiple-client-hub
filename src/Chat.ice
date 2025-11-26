@@ -58,9 +58,13 @@ module ChatApp {
     };
     
     // ==================== SUBJECT (Servidor - MANEJA OBSERVERS) ====================
-    
+    exception UserAlreadyConnectedException {
+        string username;
+        string reason;
+    };
+
     interface Subject {
-        void attachObserver(string username, ChatObserver* observer);
+        void attachObserver(string username, ChatObserver* observer) throws UserAlreadyConnectedException;
         void deAttachObserver(string username);
     };
     

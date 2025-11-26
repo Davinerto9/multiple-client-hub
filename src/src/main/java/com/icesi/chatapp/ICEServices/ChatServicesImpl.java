@@ -29,14 +29,20 @@ public class ChatServicesImpl implements ChatService {
         this.subject = subject;
     }
 
-    public void registerUserConnection(String username) {
-        System.out.println("✅ Registrando usuario en connectedUsers: " + username);
+    public void registerUserConnection(String username) throws UserAlreadyConnectedException {
+        System.out.println("Registrando usuario en connectedUsers: " + username);
+
+        if (connectedUsers.contains(username)) {
+            throw new UserAlreadyConnectedException(
+                    username,
+                    "User already logged in");
+        }
         connectedUsers.add(username);
         subject.notifyUserConnected(username);
     }
 
     public void unregisterUserConnection(String username) {
-        System.out.println("❌ Desregistrando usuario de connectedUsers: " + username);
+        System.out.println("Desregistrando usuario de connectedUsers: " + username);
         connectedUsers.remove(username);
         subject.notifyUserDisconnected(username);
     }
@@ -61,22 +67,22 @@ public class ChatServicesImpl implements ChatService {
     @Override
     public boolean createGroup(String groupName, String[] members, Current current) {
         System.out.println("═══════════════════════════════════════════");
-        System.out.println("📁 Creando grupo: " + groupName);
-        System.out.println("   Miembros solicitados: " + Arrays.toString(members));
-        System.out.println("   Usuarios conectados: " + connectedUsers);
+        System.out.println("Creando grupo: " + groupName);
+        System.out.println("Miembros solicitados: " + Arrays.toString(members));
+        System.out.println("Usuarios conectados: " + connectedUsers);
 
         if (groupName == null || groupName.trim().isEmpty()) {
-            System.err.println("❌ Nombre de grupo vacío");
+            System.err.println("Nombre de grupo vacío");
             return false;
         }
 
         if (groups.containsKey(groupName)) {
-            System.err.println("❌ El grupo ya existe");
+            System.err.println("El grupo ya existe");
             return false;
         }
 
         if (members == null || members.length < 2) {
-            System.err.println("❌ Se requieren al menos 2 miembros");
+            System.err.println("Se requieren al menos 2 miembros");
             return false;
         }
 
@@ -85,7 +91,7 @@ public class ChatServicesImpl implements ChatService {
             String cleanMember = member.trim();
             if (!cleanMember.isEmpty()) {
                 if (!connectedUsers.contains(cleanMember)) {
-                    System.err.println("❌ Usuario NO conectado: " + cleanMember);
+                    System.err.println("Usuario NO conectado: " + cleanMember);
                     return false;
                 }
                 validMembers.add(cleanMember);
@@ -93,14 +99,14 @@ public class ChatServicesImpl implements ChatService {
         }
 
         if (validMembers.size() < 2) {
-            System.err.println("❌ Se requieren al menos 2 miembros válidos y conectados");
+            System.err.println("Se requieren al menos 2 miembros válidos y conectados");
             return false;
         }
 
         groups.put(groupName, validMembers);
         GroupsStorage.saveGroups(groups);
 
-        System.out.println("✅ Grupo creado exitosamente con " + validMembers.size() + " miembros");
+        System.out.println("Grupo creado exitosamente con " + validMembers.size() + " miembros");
         System.out.println("═══════════════════════════════════════════");
 
         subject.notifyGroupCreated(groupName, validMembers.toArray(new String[0]));
@@ -110,10 +116,10 @@ public class ChatServicesImpl implements ChatService {
 
     @Override
     public boolean deleteGroup(String groupName, Current current) {
-        System.out.println("🗑️ Eliminando grupo: " + groupName);
+        System.out.println("Eliminando grupo: " + groupName);
 
         if (!groups.containsKey(groupName)) {
-            System.err.println("❌ El grupo no existe");
+            System.err.println("El grupo no existe");
             return false;
         }
 
@@ -123,7 +129,7 @@ public class ChatServicesImpl implements ChatService {
         deleteGroupAudios(groupName);
         subject.notifyGroupDeleted(groupName);
 
-        System.out.println("✅ Grupo eliminado");
+        System.out.println("Grupo eliminado");
         return true;
     }
 
@@ -145,22 +151,22 @@ public class ChatServicesImpl implements ChatService {
 
     @Override
     public boolean addMemberToGroup(String groupName, String member, Current current) {
-        System.out.println("➕ Agregando " + member + " al grupo " + groupName);
+        System.out.println("Agregando " + member + " al grupo " + groupName);
 
         Set<String> members = groups.get(groupName);
         if (members == null) {
-            System.err.println("❌ El grupo no existe");
+            System.err.println("El grupo no existe");
             return false;
         }
 
         if (!connectedUsers.contains(member)) {
-            System.err.println("❌ El usuario no está conectado");
+            System.err.println("El usuario no está conectado");
             return false;
         }
 
         members.add(member);
         GroupsStorage.saveGroups(groups);
-        System.out.println("✅ Miembro agregado");
+        System.out.println("Miembro agregado");
 
         subject.notifyGroupCreated(groupName, members.toArray(new String[0]));
 
@@ -169,7 +175,7 @@ public class ChatServicesImpl implements ChatService {
 
     @Override
     public boolean removeMemberFromGroup(String groupName, String member, Current current) {
-        System.out.println("➖ Removiendo " + member + " del grupo " + groupName);
+        System.out.println("Removiendo " + member + " del grupo " + groupName);
 
         Set<String> members = groups.get(groupName);
         if (members == null) {
@@ -179,8 +185,8 @@ public class ChatServicesImpl implements ChatService {
         members.remove(member);
 
         if (members.isEmpty()) {
-            // 🔴 Si no quedan miembros, eliminar el grupo completo
-            System.out.println("⚠️ Grupo " + groupName + " quedó sin miembros, eliminando...");
+            // Si no quedan miembros, eliminar el grupo completo
+            System.out.println("Grupo " + groupName + " quedó sin miembros, eliminando...");
             groups.remove(groupName);
             GroupsStorage.saveGroups(groups);
             MessageHistory.deleteGroupHistory(groupName);
@@ -189,7 +195,7 @@ public class ChatServicesImpl implements ChatService {
             return true;
         }
 
-        System.out.println("✅ Miembro removido");
+        System.out.println("Miembro removido");
         GroupsStorage.saveGroups(groups);
 
         subject.notifyGroupCreated(groupName, members.toArray(new String[0]));
@@ -198,35 +204,33 @@ public class ChatServicesImpl implements ChatService {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // MENSAJES - ✅ CORREGIDO
+    // MENSAJES
     // ═══════════════════════════════════════════════════════════════
 
     @Override
     public boolean sendPrivateMessage(String sender, String recipient, String message, Current current) {
-        System.out.println("💬 Mensaje: " + sender + " → " + recipient);
+        System.out.println("Mensaje: " + sender + " → " + recipient);
 
         if (!connectedUsers.contains(recipient)) {
-            System.err.println("❌ Usuario no conectado");
+            System.err.println("Usuario no conectado");
             return false;
         }
 
         String timestamp = getCurrentTimestamp();
         MessageHistory.savePrivateMessage(sender, recipient, message);
-
-        // ✅ CORREGIDO: Notificar al DESTINATARIO, no al sender
         subject.notifyPrivateMessage(recipient, sender, message, timestamp);
 
-        System.out.println("✅ Mensaje enviado en tiempo real");
+        System.out.println("Mensaje enviado en tiempo real");
         return true;
     }
 
     @Override
     public boolean sendGroupMessage(String sender, String groupName, String message, Current current) {
-        System.out.println("📁 Mensaje grupal: " + sender + " → " + groupName);
+        System.out.println("Mensaje grupal: " + sender + " → " + groupName);
 
         Set<String> members = groups.get(groupName);
         if (members == null) {
-            System.err.println("❌ El grupo no existe");
+            System.err.println("El grupo no existe");
             return false;
         }
 
@@ -235,19 +239,19 @@ public class ChatServicesImpl implements ChatService {
 
         subject.notifyGroupMessage(groupName, sender, message, timestamp, members);
 
-        System.out.println("✅ Mensaje grupal enviado en tiempo real");
+        System.out.println("Mensaje grupal enviado en tiempo real");
         return true;
     }
 
     @Override
     public void clearPrivateHistory(String user1, String user2, Current current) {
-        System.out.println("🧹 Borrando historial privado: " + user1 + " <-> " + user2);
+        System.out.println("Borrando historial privado: " + user1 + " <-> " + user2);
         MessageHistory.deletePrivateHistory(user1, user2);
     }
 
     @Override
     public void clearGroupHistory(String groupName, Current current) {
-        System.out.println("🧹 Borrando historial de grupo: " + groupName);
+        System.out.println("Borrando historial de grupo: " + groupName);
         MessageHistory.deleteGroupHistory(groupName);
         // opcional: borrar audios asociados
         deleteGroupAudios(groupName);
@@ -255,15 +259,15 @@ public class ChatServicesImpl implements ChatService {
 
     @Override
     public TextMessage[] getPrivateHistory(String user1, String user2, Current current) {
-        System.out.println("📜 Cargando historial: " + user1 + " <-> " + user2);
+        System.out.println("Cargando historial: " + user1 + " <-> " + user2);
         List<TextMessage> messages = MessageHistory.loadPrivateHistory(user1, user2);
-        System.out.println("✅ Total mensajes: " + messages.size());
+        System.out.println("Total mensajes: " + messages.size());
         return messages.toArray(new TextMessage[0]);
     }
 
     @Override
     public TextMessage[] getGroupHistory(String groupName, Current current) {
-        System.out.println("📜 Cargando historial grupal: " + groupName);
+        System.out.println("Cargando historial grupal: " + groupName);
         List<TextMessage> messages = MessageHistory.loadGroupHistory(groupName);
         return messages.toArray(new TextMessage[0]);
     }
@@ -275,10 +279,10 @@ public class ChatServicesImpl implements ChatService {
     @Override
     public boolean sendVoiceNote(String sender, String recipient, AudioMetadata metadata, byte[] data,
             Current current) {
-        System.out.println("🎤 Nota de voz: " + sender + " → " + recipient);
+        System.out.println("Nota de voz: " + sender + " → " + recipient);
 
         if (!connectedUsers.contains(recipient)) {
-            System.err.println("❌ Usuario no conectado");
+            System.err.println("Usuario no conectado");
             return false;
         }
 
@@ -290,17 +294,17 @@ public class ChatServicesImpl implements ChatService {
         metadata.size = data.length;
         metadata.timestamp = getCurrentTimestamp();
 
-        System.out.println("✅ Audio enviado en tiempo real (" + data.length + " bytes)");
+        System.out.println("Audio enviado en tiempo real (" + data.length + " bytes)");
         return true;
     }
 
     @Override
     public boolean sendGroupVoiceNote(String sender, String groupName, byte[] data, Current current) {
-        System.out.println("🎤 Nota de voz grupal: " + sender + " → " + groupName);
+        System.out.println("Nota de voz grupal: " + sender + " → " + groupName);
 
         Set<String> members = groups.get(groupName);
         if (members == null) {
-            System.err.println("❌ El grupo no existe");
+            System.err.println("El grupo no existe");
             return false;
         }
 
@@ -319,21 +323,21 @@ public class ChatServicesImpl implements ChatService {
             }
         }
 
-        System.out.println("✅ Audio grupal enviado en tiempo real");
+        System.out.println("Audio grupal enviado en tiempo real");
         return true;
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // LLAMADAS - ✅ CORREGIDO
+    // LLAMADAS
     // ═══════════════════════════════════════════════════════════════
 
     @Override
     public String initiateCall(String caller, String callee, Current current) {
-        System.out.println("📞 Iniciando llamada: " + caller + " → " + callee);
+        System.out.println("Iniciando llamada: " + caller + " → " + callee);
 
         if (!connectedUsers.contains(callee)) {
-            System.err.println("❌ Usuario no disponible");
-            return ""; // ✅ Retorna vacío si no está conectado
+            System.err.println("Usuario no disponible");
+            return "";
         }
 
         String callId = UUID.randomUUID().toString();
@@ -355,17 +359,17 @@ public class ChatServicesImpl implements ChatService {
 
         subject.notifyIncomingCall(callee, callInfo);
 
-        System.out.println("✅ Llamada iniciada, ID: " + callId);
+        System.out.println("Llamada iniciada, ID: " + callId);
         return callId;
     }
 
     @Override
     public boolean answerCall(String callId, boolean accepted, Current current) {
-        System.out.println("📞 Respuesta: " + callId + " | " + (accepted ? "Aceptada" : "Rechazada"));
+        System.out.println("Respuesta: " + callId + " | " + (accepted ? "Aceptada" : "Rechazada"));
 
         CallInfo callInfo = activeCalls.get(callId);
         if (callInfo == null) {
-            System.err.println("❌ Llamada no existe");
+            System.err.println("Llamada no existe");
             return false;
         }
 
@@ -375,7 +379,7 @@ public class ChatServicesImpl implements ChatService {
             activeCalls.remove(callId);
         }
 
-        System.out.println("✅ Respuesta enviada en tiempo real");
+        System.out.println("Respuesta enviada en tiempo real");
         return true;
     }
 
@@ -400,11 +404,11 @@ public class ChatServicesImpl implements ChatService {
 
     @Override
     public boolean endCall(String callId, Current current) {
-        System.out.println("📞 Terminando llamada: " + callId);
+        System.out.println("Terminando llamada: " + callId);
 
         CallInfo callInfo = activeCalls.remove(callId);
         if (callInfo == null) {
-            System.err.println("❌ Llamada no existe");
+            System.err.println("Llamada no existe");
             return false;
         }
 
@@ -417,7 +421,7 @@ public class ChatServicesImpl implements ChatService {
         subject.notifyCallEnded(callInfo.caller, callId);
         subject.notifyCallEnded(callInfo.callee, callId);
 
-        System.out.println("✅ Llamada terminada");
+        System.out.println("Llamada terminada");
         return true;
     }
 

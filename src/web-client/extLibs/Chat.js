@@ -188,6 +188,43 @@
         "onGroupDeleted": [, , , , , [[7]], , , , ]
     });
 
+    ChatApp.UserAlreadyConnectedException = class extends Ice.UserException
+    {
+        constructor(username = "", reason = "", _cause = "")
+        {
+            super(_cause);
+            this.username = username;
+            this.reason = reason;
+        }
+
+        static get _parent()
+        {
+            return Ice.UserException;
+        }
+
+        static get _id()
+        {
+            return "::ChatApp::UserAlreadyConnectedException";
+        }
+
+        _mostDerivedType()
+        {
+            return ChatApp.UserAlreadyConnectedException;
+        }
+
+        _writeMemberImpl(ostr)
+        {
+            ostr.writeString(this.username);
+            ostr.writeString(this.reason);
+        }
+
+        _readMemberImpl(istr)
+        {
+            this.username = istr.readString();
+            this.reason = istr.readString();
+        }
+    };
+
     const iceC_ChatApp_Subject_ids = [
         "::ChatApp::Subject",
         "::Ice::Object"
@@ -203,7 +240,10 @@
 
     Slice.defineOperations(ChatApp.Subject, ChatApp.SubjectPrx, iceC_ChatApp_Subject_ids, 0,
     {
-        "attachObserver": [, , , , , [[7], ["ChatApp.ChatObserverPrx"]], , , , ],
+        "attachObserver": [, , , , , [[7], ["ChatApp.ChatObserverPrx"]], ,
+        [
+            ChatApp.UserAlreadyConnectedException
+        ], , ],
         "deAttachObserver": [, , , , , [[7]], , , , ]
     });
 

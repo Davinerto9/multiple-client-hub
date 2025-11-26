@@ -40,7 +40,7 @@ class chatService {
             console.log('Comunicador creado con ACM.Client=0');
 
 
-            const hostname = '192.168.18.183';
+            const hostname = 'localhost';
             const port = 12345;
 
             const serviceProxy = this.communicator.stringToProxy(
@@ -88,8 +88,32 @@ class chatService {
             // ═══════════════════════════════════════════════════════════
             // PASO 5: Registrar el observer en el Subject
             // ═══════════════════════════════════════════════════════════
-            await this.subjectPrx.attachObserver(username, observerPrx);
-            console.log('Observer registrado en Subject');
+            // PASO 5: Registrar el observer en el Subject
+            try {
+                await this.subjectPrx.attachObserver(username, observerPrx);
+                console.log('Observer registrado en Subject');
+            } catch (e) {
+                console.log('EXCEPCIÓN ICE NAME =', e.ice_name && e.ice_name()); // <--- NUEVO
+
+                if (e.ice_name && e.ice_name() === 'ChatApp::UserAlreadyConnectedException') {
+                    console.warn(`Usuario duplicado: ${username}`, e);
+
+                    this.chatServicePrx = null;
+                    this.subjectPrx = null;
+                    this.observerAdapter = null;
+
+                    if (this.communicator) {
+                        try { await this.communicator.destroy(); } catch (_) { }
+                    }
+                    this.communicator = null;
+
+                    return false;
+                }
+
+                throw e;
+            }
+
+
 
             console.log('═══════════════════════════════════════════');
             console.log('Conexión Ice completada - CALLBACKS ACTIVOS');
@@ -575,13 +599,13 @@ class ChatObserverI extends ChatApp.ChatObserver {
         super();
         this.callbacks = callbacks;
         console.log('═══════════════════════════════════════════');
-        console.log('🎯 ChatObserver CREADO');
+        console.log('ChatObserver CREADO');
         console.log('   Callbacks registrados:', Object.keys(callbacks));
         console.log('═══════════════════════════════════════════');
     }
 
     onPrivateMessage(sender, message, timestamp, current) {
-        console.log('🔔 CALLBACK: onPrivateMessage');
+        console.log('CALLBACK: onPrivateMessage');
         console.log('   Sender:', sender);
         console.log('   Message:', message);
 
@@ -596,7 +620,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onGroupMessage(sender, groupName, message, timestamp, current) {
-        console.log('🔔 CALLBACK: onGroupMessage');
+        console.log('CALLBACK: onGroupMessage');
         console.log('   Group:', groupName);
         console.log('   Sender:', sender);
 
@@ -612,7 +636,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onVoiceNoteReceived(sender, metadata, data, current) {
-        console.log('🔔 CALLBACK: onVoiceNoteReceived');
+        console.log('CALLBACK: onVoiceNoteReceived');
         console.log('   Sender:', sender);
         console.log('   Size:', data.length, 'bytes');
 
@@ -634,7 +658,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onGroupVoiceNote(sender, groupName, metadata, data, current) {
-        console.log('🔔 CALLBACK: onGroupVoiceNote');
+        console.log('CALLBACK: onGroupVoiceNote');
         console.log('   Group:', groupName);
         console.log('   Sender:', sender);
         console.log('   Size:', data.length, 'bytes');
@@ -659,7 +683,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
 
 
     onIncomingCall(callInfo, current) {
-        console.log('🔔 CALLBACK: onIncomingCall');
+        console.log('CALLBACK: onIncomingCall');
         console.log('   CallId:', callInfo.callId);
         console.log('   Caller:', callInfo.caller);
 
@@ -672,7 +696,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onCallAnswered(callId, accepted, current) {
-        console.log('🔔 CALLBACK: onCallAnswered');
+        console.log('CALLBACK: onCallAnswered');
         console.log('   CallId:', callId);
         console.log('   Accepted:', accepted);
 
@@ -686,7 +710,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onCallAudioChunk(callId, sender, chunk, current) {
-        console.log('🔔 CALLBACK: onCallAudioChunk');
+        console.log('CALLBACK: onCallAudioChunk');
         console.log('   CallId:', callId);
         console.log('   Sender:', sender);
         console.log('   Bytes:', chunk.length);
@@ -703,13 +727,13 @@ class ChatObserverI extends ChatApp.ChatObserver {
                 });
             }
         } catch (e) {
-            console.error('❌ Error procesando audio de llamada (PCM):', e);
+            console.error('Error procesando audio de llamada (PCM):', e);
         }
     }
 
 
     onCallEnded(callId, current) {
-        console.log('🔔 CALLBACK: onCallEnded');
+        console.log('CALLBACK: onCallEnded');
         console.log('   CallId:', callId);
 
         if (this.callbacks.onCall) {
@@ -721,7 +745,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onUserConnected(username, current) {
-        console.log('🔔 CALLBACK: onUserConnected');
+        console.log('CALLBACK: onUserConnected');
         console.log('   Username:', username);
 
         if (this.callbacks.onUserStatus) {
@@ -733,7 +757,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onUserDisconnected(username, current) {
-        console.log('🔔 CALLBACK: onUserDisconnected');
+        console.log('CALLBACK: onUserDisconnected');
         console.log('   Username:', username);
 
         if (this.callbacks.onUserStatus) {
@@ -745,7 +769,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onGroupCreated(groupName, members, current) {
-        console.log('🔔 CALLBACK: onGroupCreated');
+        console.log('CALLBACK: onGroupCreated');
         console.log('   Group:', groupName);
         console.log('   Members:', members);
 
@@ -759,7 +783,7 @@ class ChatObserverI extends ChatApp.ChatObserver {
     }
 
     onGroupDeleted(groupName, current) {
-        console.log('🔔 CALLBACK: onGroupDeleted');
+        console.log('CALLBACK: onGroupDeleted');
         console.log('   Group:', groupName);
 
         if (this.callbacks.onGroupUpdate) {

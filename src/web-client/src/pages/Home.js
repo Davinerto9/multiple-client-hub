@@ -52,7 +52,7 @@ export function Home() {
       return false;
     }
 
-    iceStatus.textContent = '✅ Ice listo';
+    iceStatus.textContent = 'Servicio listo';
     iceStatus.style.color = '#10b981';
     return true;
   }
@@ -78,7 +78,7 @@ export function Home() {
       input.disabled = true;
       button.textContent = 'Connecting...';
       message.textContent = '';
-      iceStatus.textContent = '🔌 Conectando a Ice...';
+      iceStatus.textContent = 'Conectando...';
       iceStatus.style.color = '#3b82f6';
 
       const ChatService = window.ChatService;
@@ -89,31 +89,31 @@ export function Home() {
       // Callbacks dummy: se reenviarán cuando ChatApp exista
       const dummyCallbacks = {
         onMessage: (data) => {
-          console.log('🔔 [DUMMY] onMessage:', data);
+          console.log('[DUMMY] onMessage:', data);
           if (window.currentChatApp && window.currentChatApp.handleIncomingMessage) {
             window.currentChatApp.handleIncomingMessage(data);
           }
         },
         onVoiceNote: (data) => {
-          console.log('🔔 [DUMMY] onVoiceNote');
+          console.log('[DUMMY] onVoiceNote');
           if (window.currentChatApp && window.currentChatApp.handleIncomingVoiceNote) {
             window.currentChatApp.handleIncomingVoiceNote(data);
           }
         },
         onCall: (data) => {
-          console.log('🔔 [DUMMY] onCall:', data.type);
+          console.log('[DUMMY] onCall:', data.type);
           if (window.currentChatApp && window.currentChatApp.handleCallEvent) {
             window.currentChatApp.handleCallEvent(data);
           }
         },
         onUserStatus: (data) => {
-          console.log('🔔 [DUMMY] onUserStatus:', data.username, data.online);
+          console.log('[DUMMY] onUserStatus:', data.username, data.online);
           if (window.currentChatApp && window.currentChatApp.handleUserStatusChange) {
             window.currentChatApp.handleUserStatusChange(data);
           }
         },
         onGroupUpdate: (data) => {
-          console.log('🔔 [DUMMY] onGroupUpdate:', data.type);
+          console.log('[DUMMY] onGroupUpdate:', data.type);
           if (window.currentChatApp && window.currentChatApp.handleGroupUpdate) {
             window.currentChatApp.handleGroupUpdate(data);
           }
@@ -121,17 +121,28 @@ export function Home() {
       };
 
       const iceConnected = await ChatService.initialize(username, dummyCallbacks);
+
+      // si initialize devolvió false es porque el usuario ya estaba conectado
       if (!iceConnected) {
-        throw new Error('No se pudo conectar a Ice');
+        message.textContent = `El usuario "${username}" ya tiene una sesión activa.`;
+        message.style.color = '#e11d48';
+        iceStatus.textContent = 'Usuario duplicado';
+        iceStatus.style.color = '#e11d48';
+
+        button.disabled = false;
+        input.disabled = false;
+        button.textContent = 'Enter Chat';
+        return; // no sigas creando ChatApp
       }
+
 
       // Verificar que el proxy esté listo
       if (!ChatService.chatServicePrx) {
         throw new Error('Ice proxy no está disponible');
       }
 
-      console.log('✅ Ice conectado y proxy verificado');
-      iceStatus.textContent = '✅ Ice conectado';
+      console.log('Ice conectado y proxy verificado');
+      iceStatus.textContent = 'Ice conectado';
       iceStatus.style.color = '#10b981';
 
       // Guardar en sessionStorage para reconexión automática en ChatApp.ensureIceConnection
@@ -142,7 +153,7 @@ export function Home() {
       message.style.color = '#10b981';
 
       // Crear ChatApp
-      console.log('🚀 Creando ChatApp...');
+      console.log('Creando ChatApp...');
       const app = document.getElementById('app');
       app.innerHTML = '';
 
@@ -152,7 +163,7 @@ export function Home() {
       // Referencia global para callbacks
       window.currentChatApp = chatAppElement;
 
-      console.log('✅ ChatApp creado y montado en el DOM');
+      console.log('ChatApp creado y montado en el DOM');
       console.log('═══════════════════════════════════════════');
 
       // Cargar datos iniciales desde ChatApp
@@ -163,13 +174,13 @@ export function Home() {
       }
     } catch (err) {
       console.error('═══════════════════════════════════════════');
-      console.error('❌ Error connecting:', err.message);
+      console.error('Error connecting:', err.message);
       console.error(' Stack:', err.stack);
       console.error('═══════════════════════════════════════════');
 
       message.textContent = 'Error connecting: ' + err.message;
       message.style.color = '#e11d48';
-      iceStatus.textContent = '❌ Error de conexión';
+      iceStatus.textContent = 'Error de conexión';
       iceStatus.style.color = '#e11d48';
 
       button.disabled = false;

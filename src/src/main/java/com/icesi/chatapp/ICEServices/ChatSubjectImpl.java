@@ -18,13 +18,13 @@ public class ChatSubjectImpl implements Subject {
     }
 
     @Override
-    public void attachObserver(String username, ChatObserverPrx observer, Current current) {
+    public void attachObserver(String username, ChatObserverPrx observer, Current current) throws UserAlreadyConnectedException{
         System.out.println("═══════════════════════════════════════════");
         System.out.println("ATTACH OBSERVER: " + username);
-
+        chatServices.registerUserConnection(username);
         // Usar ice_fixed para mantener la conexión
         ChatObserverPrx proxy = observer.ice_fixed(current.con);
-
+        
         if (current.con != null) {
             userConnections.put(username, current.con);
 
@@ -42,8 +42,6 @@ public class ChatSubjectImpl implements Subject {
         observers.put(username, proxy);
         System.out.println("Observers activos: " + observers.keySet());
         System.out.println("═══════════════════════════════════════════");
-
-        chatServices.registerUserConnection(username);
     }
 
     @Override

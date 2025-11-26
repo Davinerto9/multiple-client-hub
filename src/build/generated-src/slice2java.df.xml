@@ -1,0 +1,25 @@
+<state>
+  <timestamp value='1764141331069' />
+  <sourceSet name='default'>
+    <source name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\Chat.ice'>
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\TextMessage.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\AudioMetadata.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\CallInfo.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\GroupInfo.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\ChatObserver.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\UserAlreadyConnectedException.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\Subject.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\ChatService.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\MessageSeqHelper.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\GroupSeqHelper.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\ChatObserverPrx.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\_ChatObserverPrxI.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\SubjectPrx.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\_SubjectPrxI.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\ChatServicePrx.java' />
+      <file name='C:\Users\Davin\Documents\DCR\testing workshop\ICE-CHAT-impl\multiple-client-hub\src\build\generated-src\ChatApp\_ChatServicePrxI.java' />
+    </source>
+    <arg value='C:\Program Files\ZeroC\Ice-3.7.10\\bin\slice2java.exe' />
+    <arg value='-IC:\Program Files\ZeroC\Ice-3.7.10\\slice' />
+  </sourceSet>
+</state>

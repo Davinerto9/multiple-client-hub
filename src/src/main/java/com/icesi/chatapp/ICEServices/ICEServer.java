@@ -12,7 +12,7 @@ public class ICEServer {
             // Configurar WebSocket HTTP para navegadores
             ObjectAdapter adapter = communicator.createObjectAdapterWithEndpoints(
                     "ChatAdapter",
-                    "ws -h 192.168.18.183 -p 12345");
+                    "ws -h localhost -p 12345");
 
             // Crear instancias del patrón Observer
             ChatServicesImpl chatServices = new ChatServicesImpl(null); // null temporalmente
