@@ -203,10 +203,6 @@ public class ChatServicesImpl implements ChatService {
         return true;
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // MENSAJES
-    // ═══════════════════════════════════════════════════════════════
-
     @Override
     public boolean sendPrivateMessage(String sender, String recipient, String message, Current current) {
         System.out.println("Mensaje: " + sender + " → " + recipient);
@@ -253,7 +249,6 @@ public class ChatServicesImpl implements ChatService {
     public void clearGroupHistory(String groupName, Current current) {
         System.out.println("Borrando historial de grupo: " + groupName);
         MessageHistory.deleteGroupHistory(groupName);
-        // opcional: borrar audios asociados
         deleteGroupAudios(groupName);
     }
 
@@ -271,10 +266,6 @@ public class ChatServicesImpl implements ChatService {
         List<TextMessage> messages = MessageHistory.loadGroupHistory(groupName);
         return messages.toArray(new TextMessage[0]);
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // AUDIO/VOZ
-    // ═══════════════════════════════════════════════════════════════
 
     @Override
     public boolean sendVoiceNote(String sender, String recipient, AudioMetadata metadata, byte[] data,
@@ -326,10 +317,6 @@ public class ChatServicesImpl implements ChatService {
         System.out.println("Audio grupal enviado en tiempo real");
         return true;
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // LLAMADAS
-    // ═══════════════════════════════════════════════════════════════
 
     @Override
     public String initiateCall(String caller, String callee, Current current) {

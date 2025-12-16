@@ -52,10 +52,6 @@ public class ChatSubjectImpl implements Subject {
         chatServices.unregisterUserConnection(username);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // MÉTODOS NOTIFY (INVOCAN CALLBACKS EN CLIENTES)
-    // ═══════════════════════════════════════════════════════════════
-
     public void notifyPrivateMessage(String recipient, String sender, String message, String timestamp) {
         ChatObserverPrx observer = observers.get(recipient);
         if (observer != null) {

@@ -4,7 +4,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import ChatApp.TextMessage; // <-- AGREGAR IMPORT
+import ChatApp.TextMessage;
 
 public class MessageHistory {
     private static final String HISTORY_DIR = "src/chat_history";
@@ -227,10 +227,6 @@ public class MessageHistory {
 
         return messages;
     }
-
-    // ============================
-    // NUEVOS MÉTODOS (byte[])
-    // ============================
 
     /**
      * Guarda una nota de voz privada a partir de los bytes recibidos

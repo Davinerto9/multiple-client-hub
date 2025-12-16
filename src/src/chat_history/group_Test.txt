@@ -3,3 +3,6 @@
 [2025-11-25 14:43:14] david en Test: good n you
 [2025-11-25 14:43:23] adry en Test: [AUDIO:group_Test_adry_2025-11-25_14-43-23.webm]
 [2025-11-25 14:58:13] adry en Test: [AUDIO:group_Test_adry_2025-11-25_14-58-13.webm]
+[2025-11-26 12:52:50] david en Test: lol
+[2025-11-26 14:23:34] adry en Test: hi
+[2025-11-26 14:25:11] adry en Test: jojo
