@@ -83,3 +83,9 @@
 [2025-11-25 22:20:19] adry -> david: mama 6
 [2025-11-25 22:21:21] david -> adry: [CALL START] 2025-11-25 22:21:21
 [2025-11-25 22:22:13] david -> adry: [CALL END] 2025-11-25 22:22:13
+[2025-11-26 14:07:34] david -> adry: hola
+[2025-11-26 14:07:39] adry -> david: chao
+[2025-11-26 14:07:45] david -> adry: [AUDIO:private_david_adry_2025-11-26_14-07-45.webm]
+[2025-11-26 14:07:51] adry -> david: [CALL START] 2025-11-26 14:07:51
+[2025-11-26 14:08:05] adry -> david: [CALL END] 2025-11-26 14:08:05
+[2025-11-26 14:26:21] adry -> david: [AUDIO:private_adry_david_2025-11-26_14-26-21.webm]

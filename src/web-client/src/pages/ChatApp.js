@@ -1,10 +1,6 @@
 export default function ChatApp(username) {
     const container = document.createElement('div');
     container.classList.add('chat-container');
-
-    // ============================================
-    // 1. Verificar / Re-conectar ICE si es necesario
-    // ============================================
     async function ensureIceConnection() {
         // Si no hay proxy activo, intentar crear/reconectar
         if (!window.ChatService || !window.ChatService.chatServicePrx) {
@@ -89,13 +85,9 @@ export default function ChatApp(username) {
             return false;
         }
 
-        // Ya hay proxy válido
         return true;
     }
 
-    // ============================================
-    // 2. Estado de la aplicación
-    // ============================================
     let selectedChat = null;
     let chatType = null; // 'private' | 'group'
     let currentUser = username;
@@ -114,30 +106,20 @@ export default function ChatApp(username) {
     let callStates = {}; // callId -> 'ringing' | 'active'
     let replyToMessage = null;  // { sender, content, timestamp }
 
-
-    // Captura PCM para llamada
     let callAudioContext = null;
     let callSourceNode = null;
     let callProcessorNode = null;
     let callMicStream = null;
-
-    // Reproducción PCM para llamada
     let callPlaybackContext = null;
     let callPlaybackQueue = [];
     let callPlaybackPlaying = false;
 
-
-
-    // Referencias DOM
     let usersListElement = null;
     let groupsListElement = null;
     const mainChat = document.createElement('div');
     mainChat.classList.add('main-chat');
     mainChat.id = 'mainChat';
 
-    // ============================================
-    // 3. Carga inicial de datos
-    // ============================================
     async function loadInitialData() {
         try {
             console.log('═══════════════════════════════════════════');
@@ -156,7 +138,6 @@ export default function ChatApp(username) {
             users = [];
             groups = [];
 
-            // Usuarios conectados
             try {
                 console.log('👥 Obteniendo usuarios conectados...');
                 const usersData = await window.ChatService.getConnectedUsers();
@@ -176,7 +157,6 @@ export default function ChatApp(username) {
                 users = [];
             }
 
-            // Grupos
             try {
                 console.log('Obteniendo grupos...');
                 const groupsData = await window.ChatService.getAllGroups();
@@ -290,9 +270,6 @@ export default function ChatApp(username) {
         }
     }
 
-    // ============================================
-    // 4. Sidebar (usuarios / grupos / logout)
-    // ============================================
     function createSidebar() {
         const sidebar = document.createElement('div');
         sidebar.classList.add('sidebar');
@@ -386,9 +363,6 @@ export default function ChatApp(username) {
         return sidebar;
     }
 
-    // ============================================
-    // 5. Render de listas y main chat
-    // ============================================
     function renderUsersList() {
         if (!usersListElement) return;
         usersListElement.innerHTML = '';
@@ -638,7 +612,7 @@ export default function ChatApp(username) {
             emptyMsg.textContent = 'No messages yet. Start the conversation!';
             messagesContainer.appendChild(emptyMsg);
         } else {
-            messages.forEach(msg => {
+            [...messages].reverse().forEach(msg => {
                 const wrapper = document.createElement('div');
                 wrapper.classList.add('message-wrapper');
                 wrapper.classList.add(msg.sender === username ? 'sent' : 'received');
@@ -689,7 +663,6 @@ export default function ChatApp(username) {
                     content.appendChild(icon);
                     content.appendChild(label);
                 } else {
-                    // 🔹 Parsear posible reply en msg.content
                     let raw = msg.content || '';
                     let replyMeta = null;
 
@@ -720,7 +693,6 @@ export default function ChatApp(username) {
                 message.appendChild(content);
                 message.appendChild(time);
 
-                // 🔹 Botón Reply solo para recibidos
                 if (msg.sender !== username) {
                     const replyBtn = document.createElement('button');
                     replyBtn.textContent = 'Reply';
@@ -765,7 +737,6 @@ export default function ChatApp(username) {
         const groupName = typeof selectedChat === 'object' ? selectedChat.name : selectedChat;
         if (!groupName || chatType !== 'group') return;
 
-        // Buscar grupo actual para mostrar miembros
         const groupObj = groups.find(g => {
             const name = typeof g === 'string' ? g : g.name;
             return name === groupName;
@@ -784,7 +755,6 @@ export default function ChatApp(username) {
         const info = document.createElement('p');
         info.textContent = 'Add or remove a single user at a time.';
 
-        // 🔹 Lista visible de miembros actuales
         const membersBox = document.createElement('div');
         membersBox.style.margin = '10px 0 15px 0';
         membersBox.style.maxHeight = '120px';
@@ -896,7 +866,7 @@ export default function ChatApp(username) {
             return;
         }
 
-        newMessages.forEach(msg => {
+        [...newMessages].reverse().forEach(msg => {
             const wrapper = document.createElement('div');
             wrapper.classList.add('message-wrapper');
             wrapper.classList.add(msg.sender === username ? 'sent' : 'received');
@@ -920,7 +890,6 @@ export default function ChatApp(username) {
             const isCallEnd = msg.isCallEnd;
 
             if (isAudio) {
-                // Audio guardado en historial
                 window.ChatService.getAudioFromHistory(msg.audioFile)
                     .then(bytes => {
                         if (bytes && bytes.length > 0) {
@@ -1094,9 +1063,6 @@ export default function ChatApp(username) {
         return inputContainer;
     }
 
-    // ============================================
-    // 6. Historial (vista)
-    // ============================================
     function renderHistoryView() {
         const main = document.getElementById('mainChat');
         if (!main) return;
@@ -1204,10 +1170,6 @@ export default function ChatApp(username) {
         main.appendChild(historyContainer);
     }
 
-
-    // ============================================
-    // 7. Acciones: enviar mensaje / historial / refresh
-    // ============================================
     async function sendMessage() {
         const input = document.getElementById('messageInput');
         const errorDiv = document.getElementById('errorMessage');
@@ -1440,10 +1402,6 @@ export default function ChatApp(username) {
         }
     }
 
-
-    // ============================================
-    // 8. Logout y modales de grupos
-    // ============================================
     function handleLogout() {
         sessionStorage.removeItem('username');
         document.getElementById('app').innerHTML = '';
@@ -1482,7 +1440,7 @@ export default function ChatApp(username) {
         cancelBtn.classList.add('modal-btn', 'modal-btn-cancel');
         cancelBtn.textContent = 'Cancel';
         cancelBtn.addEventListener('click', async () => {
-            await window.ChatService.endCall(callId);
+            document.body.removeChild(modal);
         });
 
         const createBtn = document.createElement('button');
@@ -1650,9 +1608,6 @@ export default function ChatApp(username) {
         });
     }
 
-    // ============================================
-    // 9. Notas de voz
-    // ============================================
     async function startVoiceRecording() {
         console.log('🎤 Iniciando grabación de voz...');
 
@@ -1666,7 +1621,7 @@ export default function ChatApp(username) {
             if (!ok) return;
 
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log('✅ Acceso al micrófono concedido');
+            console.log('Acceso al micrófono concedido');
 
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
@@ -1692,7 +1647,7 @@ export default function ChatApp(username) {
                 voiceBtn.title = 'Stop Recording';
             }
         } catch (error) {
-            console.error('❌ Error al acceder al micrófono:', error);
+            console.error('Error al acceder al micrófono:', error);
             let errorMessage = 'No se pudo acceder al micrófono. ';
             if (error.name === 'NotAllowedError') {
                 errorMessage += 'Debes permitir el acceso al micrófono.';
@@ -1727,10 +1682,10 @@ export default function ChatApp(username) {
 
     async function sendVoiceNote(audioBlob) {
         console.log('ENVIANDO NOTA DE VOZ');
-        console.log('   Tamaño del blob:', audioBlob.size, 'bytes');
-        console.log('   Tipo:', audioBlob.type);
-        console.log('   Destinatario:', selectedChat);
-        console.log('   Tipo de chat:', chatType);
+        console.log('Tamaño del blob:', audioBlob.size, 'bytes');
+        console.log('Tipo:', audioBlob.type);
+        console.log('Destinatario:', selectedChat);
+        console.log('Tipo de chat:', chatType);
 
         if (!selectedChat) {
             alert('Please select a chat first');
@@ -1751,7 +1706,7 @@ export default function ChatApp(username) {
             }
 
             if (success) {
-                console.log('✅ Nota de voz enviada, pintando localmente. Tipo:', chatType);
+                console.log('Nota de voz enviada, pintando localmente. Tipo:', chatType);
 
                 let messagesContainer = document.getElementById('messagesContainer');
                 if (!messagesContainer) {
@@ -1760,7 +1715,7 @@ export default function ChatApp(username) {
                     messagesContainer = document.getElementById('messagesContainer');
                 }
                 if (!messagesContainer) {
-                    console.error('❌ No se pudo obtener messagesContainer');
+                    console.error('No se pudo obtener messagesContainer');
                     return;
                 }
 
@@ -1781,7 +1736,6 @@ export default function ChatApp(username) {
                 messagesContainer.appendChild(wrapper);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-                // Opcional: actualizar array messages para refrescos / historial en RAM
                 messages.push({
                     sender: currentUser,
                     content: '[AUDIO]',
@@ -1796,81 +1750,6 @@ export default function ChatApp(username) {
             console.error('Error enviando nota de voz:', error);
             alert('Error al enviar nota de voz: ' + error.message);
         }
-    }
-
-
-    // ============================================
-    // 10. Llamadas de audio
-    // ============================================
-
-    async function startCallAudioStreaming(callId) {
-        console.log('🎙️ Iniciando streaming de audio para llamada:', callId);
-
-        if (callMediaRecorder) {
-            console.warn('⚠️ Ya hay un streaming de llamada activo');
-            return;
-        }
-
-        try {
-            const ok = await ensureIceConnection();
-            if (!ok) return;
-
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log('✅ Micrófono para llamada concedido');
-
-            callStream = stream;
-
-            const recorder = new MediaRecorder(stream, {
-                mimeType: 'audio/webm;codecs=opus'
-            });
-            callMediaRecorder = recorder;
-
-            recorder.addEventListener('dataavailable', async (event) => {
-                if (!event.data || event.data.size === 0) return;
-
-                try {
-                    const buffer = await event.data.arrayBuffer();
-                    const uint8 = new Uint8Array(buffer);
-
-                    await window.ChatService.streamCallAudio(callId, uint8);
-                } catch (e) {
-                    console.error('❌ Error enviando chunk de llamada:', e);
-                }
-            });
-
-            recorder.addEventListener('stop', () => {
-                console.log('⏹️ Streaming de llamada detenido');
-            });
-
-            // Generar chunks cada 300–500 ms
-            recorder.start(400);
-            console.log('▶️ Streaming de llamada iniciado');
-
-        } catch (error) {
-            console.error('❌ Error iniciando streaming de llamada:', error);
-            alert('No se pudo iniciar el audio de la llamada: ' + error.message);
-        }
-    }
-
-    function stopCallAudioStreaming() {
-        console.log('🔚 Deteniendo streaming de llamada');
-
-        if (callMediaRecorder) {
-            try {
-                if (callMediaRecorder.state !== 'inactive') {
-                    callMediaRecorder.stop();
-                }
-            } catch (e) {
-                console.warn('⚠️ Error al parar MediaRecorder de llamada:', e);
-            }
-            callMediaRecorder = null;
-        }
-
-        if (callStream) {
-            callStream.getTracks().forEach(track => track.stop());
-            callStream = null;
-        }
-
     }
 
     async function initiateCall(callee) {
@@ -1926,7 +1805,6 @@ export default function ChatApp(username) {
         };
 
         callSourceNode.connect(callProcessorNode);
-        // Si no quieres oírte a ti mismo, conecta a un GainNode en 0; si no, al destino:
         // callProcessorNode.connect(callAudioContext.destination);
         callProcessorNode.connect(callAudioContext.destination);
 
@@ -1957,7 +1835,6 @@ export default function ChatApp(username) {
 
 
     function showOutgoingCallUI(callId, callee) {
-        console.log('📞 Mostrando UI de llamada saliente');
 
         const existingUI = document.getElementById('outgoingCallUI');
         if (existingUI) {
@@ -2043,9 +1920,6 @@ export default function ChatApp(username) {
         if (outUI) document.body.removeChild(outUI);
     }
 
-    // ============================================
-    // 11. Utilidades de audio y notificaciones
-    // ============================================
     function formatAudioDuration(seconds) {
         if (!seconds || isNaN(seconds) || seconds === Infinity) {
             return '0:00';

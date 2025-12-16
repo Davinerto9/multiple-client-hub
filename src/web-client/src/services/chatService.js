@@ -53,9 +53,6 @@ class chatService {
             }
             console.log('ChatService conectado');
 
-            // ═══════════════════════════════════════════════════════════
-            // PASO 3: Conectar al Subject (PATRÓN OBSERVER)
-            // ═══════════════════════════════════════════════════════════
             const subjectProxy = this.communicator.stringToProxy(
                 `Subject:ws -h ${hostname} -p ${port}`
             );
@@ -66,9 +63,6 @@ class chatService {
             }
             console.log('Subject conectado');
 
-            // ═══════════════════════════════════════════════════════════
-            // PASO 4: Crear adapter y registrar observer (IGUAL QUE EL EJEMPLO)
-            // ═══════════════════════════════════════════════════════════
             this.observerAdapter = await this.communicator.createObjectAdapter('');
 
             // Obtener conexión del Subject y asociar el adapter
@@ -85,10 +79,6 @@ class chatService {
 
             console.log('Observer creado');
 
-            // ═══════════════════════════════════════════════════════════
-            // PASO 5: Registrar el observer en el Subject
-            // ═══════════════════════════════════════════════════════════
-            // PASO 5: Registrar el observer en el Subject
             try {
                 await this.subjectPrx.attachObserver(username, observerPrx);
                 console.log('Observer registrado en Subject');
@@ -113,8 +103,6 @@ class chatService {
                 throw e;
             }
 
-
-
             console.log('═══════════════════════════════════════════');
             console.log('Conexión Ice completada - CALLBACKS ACTIVOS');
             console.log('═══════════════════════════════════════════');
@@ -133,10 +121,6 @@ class chatService {
             throw error;
         }
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // MÉTODOS DE COMUNICACIÓN
-    // ═══════════════════════════════════════════════════════════════
 
     async ensureConnected() {
         if (!this.chatServicePrx) {
@@ -590,10 +574,6 @@ class chatService {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// OBSERVER (RECIBE CALLBACKS EN TIEMPO REAL)
-// ═══════════════════════════════════════════════════════════════
-
 class ChatObserverI extends ChatApp.ChatObserver {
     constructor(callbacks) {
         super();
@@ -770,8 +750,8 @@ class ChatObserverI extends ChatApp.ChatObserver {
 
     onGroupCreated(groupName, members, current) {
         console.log('CALLBACK: onGroupCreated');
-        console.log('   Group:', groupName);
-        console.log('   Members:', members);
+        console.log('Group:', groupName);
+        console.log('Members:', members);
 
         if (this.callbacks.onGroupUpdate) {
             this.callbacks.onGroupUpdate({
